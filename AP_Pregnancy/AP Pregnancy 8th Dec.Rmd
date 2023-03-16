@@ -1,0 +1,1614 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+#Loading of libraries
+```{r}
+library(meta)
+library(readxl)
+library(ggplot2)
+library(dmetar)
+library(metafor)
+library(plyr)
+
+```
+#Reading of excel - data_AP
+```{r}
+library(readxl)
+data_AP <- read_excel("AP and Pregnancy Metaanalysis Data-Praveen Analysis.xlsx", 
+     sheet = "Sheet5")
+
+data_AP$authoryear<-paste(data_AP$author,data_AP$year,sep = " ")
+# View(data_AP)
+data_AP
+colnames(data_AP)
+
+
+data_AP$Hemisphere<-mapvalues(x = data_AP$Hemisphere,from = c(1,2),to = c("Eastern","Western"))
+
+```
+
+
+#Prevalence in total pregnancy
+```{r}
+
+colnames(data_AP)
+data_APinTotalPregnancy <-data_AP[c("authoryear","year","Acutepancreatitis_n","TotalNoPreganancy_N","Hemisphere")] 
+data_APinTotalPregnancy 
+
+data_APinTotalPregnancy<-data_APinTotalPregnancy[order(data_APinTotalPregnancy$year),]
+data_APinTotalPregnancy<-data_APinTotalPregnancy[!is.na(data_APinTotalPregnancy$Acutepancreatitis_n), ]
+
+metaprop_APinTotalPregnancy<-metaprop(event = data_APinTotalPregnancy$Acutepancreatitis_n, n = data_APinTotalPregnancy$TotalNoPreganancy_N, data=data_APinTotalPregnancy, comb.random=TRUE, studlab=data_APinTotalPregnancy$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_APinTotalPregnancy$Hemisphere)
+
+pdf(file="APinTotalPregnancy.pdf", width=10,height = 8) 
+forest.meta(metaprop_APinTotalPregnancy,layout =   "Revman")
+dev.off()
+
+
+# 
+# baujat.meta(metaprop_APinTotalPregnancy)
+# 
+# data_APinTotalPregnancy_2<-data_APinTotalPregnancy[data_APinTotalPregnancy$authoryear != "Yang et al 2020" & data_APinTotalPregnancy$authoryear != "Gunduz E et al 2014" & data_APinTotalPregnancy$authoryear != "Hernandez et al 2007" & data_APinTotalPregnancy$authoryear != "Ramin KD et al 1995",]
+# 
+# metaprop_APinTotalPregnancy_2<-metaprop(event = data_APinTotalPregnancy_2$Acutepancreatitis_n, n = data_APinTotalPregnancy_2$TotalNoPreganancy_N, data=data_APinTotalPregnancy_2, comb.random=TRUE, studlab=data_APinTotalPregnancy_2$authoryear,pscale = 100,comb.fixed = FALSE)
+# 
+# pdf(file="APinTotalPregnancy_2.pdf", width=10,height = 8) 
+# forest.meta(metaprop_APinTotalPregnancy_2,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_APinTotalPregnancy_3<-data_APinTotalPregnancy[data_APinTotalPregnancy$authoryear != "Yang et al 2020",]
+# 
+# metaprop_APinTotalPregnancy_3<-metaprop(event = data_APinTotalPregnancy_3$Acutepancreatitis_n, n = data_APinTotalPregnancy_3$TotalNoPreganancy_N, data=data_APinTotalPregnancy_3, comb.random=TRUE, studlab=data_APinTotalPregnancy_3$authoryear,pscale = 100,comb.fixed = FALSE)
+# 
+# pdf(file="APinTotalPregnancy_3.pdf", width=10,height = 8) 
+# forest.meta(metaprop_APinTotalPregnancy_3,layout =   "Revman")
+# dev.off()
+# 
+# 
+# library(dmetar)
+# inf.analysis_APinTotalPregnancy<- InfluenceAnalysis(x = metaprop_APinTotalPregnancy,
+#                                   random = TRUE)
+
+#"Maternal_Mortality_n","N
+
+
+#"Neonatal_Death_n","Neonatal_LiveBirth_N"
+table_APinTotalPregnancy <- data.frame(
+  data_AP$authoryear,
+  data_AP$year,
+  data_AP$Hemisphere,
+  data_AP$Acutepancreatitis_n,
+  data_AP$TotalNoPreganancy_N,
+  round((data_AP$Acutepancreatitis_n / data_AP$TotalNoPreganancy_N) * 1000,
+        digits = 3
+  ),
+  data_AP$Maternal_Mortality_n,
+  data_AP$N,
+  round((data_AP$Maternal_Mortality_n / data_AP$N) * 100,
+        digits = 2
+  ),
+  data_AP$Neonatal_Death_n,
+  data_AP$Neonatal_LiveBirth_N,
+  round((data_AP$Neonatal_Death_n / data_AP$Neonatal_LiveBirth_N) * 100,
+        digits = 2
+  )
+)
+table_APinTotalPregnancy = table_APinTotalPregnancy[order(table_APinTotalPregnancy$data_AP.Hemisphere,table_APinTotalPregnancy$data_AP.year,decreasing = FALSE),]
+table_APinTotalPregnancy = table_APinTotalPregnancy[,-2]
+colnames(table_APinTotalPregnancy) = c("Author (year)","Hemisphere","Acute Pancreatitis (n1)","Total no. of Pregnancy (N1)","Prevalence of AP/1000 Pregnancies [(n1/N1) * 1000]","Maternal Mortality (n2)","Total Number of AP (N2)","Maternal Mortality/100 Pregnancies with AP [(n2/N2) *100]","Neonatal Death (n3)","Neonatal Live Birth (N3)","Prevalence of Neonatal Death/1000 Neonatal Live Birth [(n3/N3) *100]")
+
+write.csv(table_APinTotalPregnancy,"table_APinTotalPregnancy.csv",na = "-")
+```
+
+
+#Etiology - Alcohol/GSD/PostERCP/HyperTG/Idiopathic
+
+
+##Alcohol
+```{r}
+data_Etiology_Alcohol <-data_AP[c("authoryear","year","Etiology_Alcohol_n","N","Hemisphere")] 
+data_Etiology_Alcohol
+
+data_Etiology_Alcohol<-data_Etiology_Alcohol[order(data_Etiology_Alcohol$year),]
+data_Etiology_Alcohol<-data_Etiology_Alcohol[!is.na(data_Etiology_Alcohol$Etiology_Alcohol_n), ]
+
+metaprop_Etiology_Alcohol<-metaprop(event = data_Etiology_Alcohol$Etiology_Alcohol_n, n = data_Etiology_Alcohol$N, data=data_Etiology_Alcohol, comb.random=TRUE, studlab=data_Etiology_Alcohol$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Etiology_Alcohol$Hemisphere)
+
+pdf(file="Etiology_Alcohol.pdf", width=10,height = 8) 
+forest.meta(metaprop_Etiology_Alcohol,layout =   "Revman",xlim = c(0,100),colgap.forest = "0.5 cm" )
+dev.off()
+
+
+#table_Etiology <-data_AP[c("authoryear","year","Hemisphere")] 
+
+table_Etiology <-
+  data.frame(
+    data_AP$authoryear,
+    data_AP$year,
+    data_AP$Hemisphere,
+    paste0(
+      data_AP$Etiology_Alcohol_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Etiology_Alcohol_n / data_AP$N) * 100,digits = 2),
+      ")"
+    ),
+    paste0(
+      data_AP$Etiology_GSD_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Etiology_GSD_n / data_AP$N) * 100,digits = 2),
+      ")"
+    ),
+    paste0(
+      data_AP$Etiology_PostERCP_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Etiology_PostERCP_n / data_AP$N) * 100,digits = 2),
+      ")"
+    ),
+    paste0(
+      data_AP$Etiology_HyperTG_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Etiology_HyperTG_n / data_AP$N) * 100,digits = 2),
+      ")"
+    ),
+    paste0(
+      data_AP$Etiology_Idiopathic_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Etiology_Idiopathic_n / data_AP$N) * 100,digits = 2),
+      ")"
+    )
+    )
+
+colnames(table_Etiology) <-  c("Author (year)","Year","Hemisphere","Alcohol","GSD","Post-ERCP","Hyper-TG","Idiopathic")
+
+table_Etiology$Alcohol[grep(x = table_Etiology$Alcohol,pattern = "NA")] <- "-"
+
+table_Etiology$GSD[grep(x = table_Etiology$GSD,pattern = "NA")] <- "-"
+
+table_Etiology$`Post-ERCP`[grep(x = table_Etiology$`Post-ERCP`,pattern = "NA")] <- "-"
+
+table_Etiology$`Hyper-TG`[grep(x = table_Etiology$`Hyper-TG`,pattern = "NA")] <- "-"
+
+table_Etiology$Idiopathic[grep(x = table_Etiology$Idiopathic,pattern = "NA")] <- "-"
+
+table_Etiology <- table_Etiology[order(table_Etiology$Hemisphere,table_Etiology$Year,decreasing = FALSE),]
+table_Etiology <- table_Etiology[,-2]
+colnames(table_Etiology) <-  c("Author (year)","Hemisphere [n/N (%)]","Alcohol [n/N (%)]","GSD [n/N (%)]","Post-ERCP [n/N (%)]","Hyper-TG [n/N (%)]","Idiopathic [n/N (%)]")
+
+```
+
+##GSD
+```{r}
+
+data_Etiology_GSD <-data_AP[c("authoryear","year","Etiology_GSD_n","N","Hemisphere")] 
+data_Etiology_GSD
+
+data_Etiology_GSD<-data_Etiology_GSD[order(data_Etiology_GSD$year),]
+data_Etiology_GSD<-data_Etiology_GSD[!is.na(data_Etiology_GSD$Etiology_GSD_n), ]
+
+metaprop_Etiology_GSD<-metaprop(event = data_Etiology_GSD$Etiology_GSD_n, n = data_Etiology_GSD$N, data=data_Etiology_GSD, comb.random=TRUE, studlab=data_Etiology_GSD$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Etiology_GSD$Hemisphere)
+
+pdf(file="Etiology_GSD.pdf", width=10,height = 8) 
+forest.meta(metaprop_Etiology_GSD,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,100))
+dev.off()
+
+
+colnames(data_AP)
+
+
+```
+
+##Post-ERCP
+```{r}
+
+data_Etiology_PostERCP <-data_AP[c("authoryear","year","Etiology_PostERCP_n","N","Hemisphere")]
+data_Etiology_PostERCP
+
+data_Etiology_PostERCP<-data_Etiology_PostERCP[order(data_Etiology_PostERCP$year),]
+data_Etiology_PostERCP<-data_Etiology_PostERCP[!is.na(data_Etiology_PostERCP$Etiology_PostERCP_n), ]
+
+metaprop_Etiology_PostERCP<-metaprop(event = data_Etiology_PostERCP$Etiology_PostERCP_n, n = data_Etiology_PostERCP$N, data=data_Etiology_PostERCP, comb.random=TRUE, studlab=data_Etiology_PostERCP$authoryear,pscale = 100,comb.fixed = FALSE)
+
+pdf(file="Etiology_PostERCP.pdf", width=10,height = 8)
+forest.meta(metaprop_Etiology_PostERCP,layout =   "Revman",colgap.forest = "0.5 cm",xlim = c(0,100))
+dev.off()
+
+
+```
+
+##Hyper TG
+```{r}
+data_Etiology_HyperTG <-data_AP[c("authoryear","year","Etiology_HyperTG_n","N","Hemisphere")] 
+data_Etiology_HyperTG
+
+data_Etiology_HyperTG<-data_Etiology_HyperTG[order(data_Etiology_HyperTG$year),]
+data_Etiology_HyperTG<-data_Etiology_HyperTG[!is.na(data_Etiology_HyperTG$Etiology_HyperTG_n), ]
+
+metaprop_Etiology_HyperTG<-metaprop(event = data_Etiology_HyperTG$Etiology_HyperTG_n, n = data_Etiology_HyperTG$N, data=data_Etiology_HyperTG, comb.random=TRUE, studlab=data_Etiology_HyperTG$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Etiology_HyperTG$Hemisphere)
+
+pdf(file="Etiology_HyperTG.pdf", width=10,height = 8) 
+forest.meta(metaprop_Etiology_HyperTG,layout =   "Revman",colgap.forest = "0.5 cm",xlim = c(0,100))
+dev.off()
+
+
+```
+
+##Idiopathic
+```{r}
+data_Etiology_Idiopathic <-data_AP[c("authoryear","year","Etiology_Idiopathic_n","N","Hemisphere")] 
+data_Etiology_Idiopathic
+
+data_Etiology_Idiopathic<-data_Etiology_Idiopathic[order(data_Etiology_Idiopathic$year),]
+data_Etiology_Idiopathic<-data_Etiology_Idiopathic[!is.na(data_Etiology_Idiopathic$Etiology_Idiopathic_n), ]
+
+metaprop_Etiology_Idiopathic<-metaprop(event = data_Etiology_Idiopathic$Etiology_Idiopathic_n, n = data_Etiology_Idiopathic$N, data=data_Etiology_Idiopathic, comb.random=TRUE, studlab=data_Etiology_Idiopathic$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Etiology_Idiopathic$Hemisphere)
+
+pdf(file="Etiology_Idiopathic.pdf", width=10,height = 8) 
+forest.meta(metaprop_Etiology_Idiopathic,layout =   "Revman",colgap.forest = "0.5 cm",xlim = c(0,100))
+dev.off()
+```
+
+#Inv Necrosectomy
+```{r}
+
+data_Inv_Necrosectomy <-data_AP[c("authoryear","year","Inv_Necrosectomy_n","N","Hemisphere")] 
+data_Inv_Necrosectomy
+
+data_Inv_Necrosectomy<-data_Inv_Necrosectomy[order(data_Inv_Necrosectomy$year),]
+data_Inv_Necrosectomy<-data_Inv_Necrosectomy[!is.na(data_Inv_Necrosectomy$Inv_Necrosectomy_n), ]
+
+metaprop_Inv_Necrosectomy<-metaprop(event = data_Inv_Necrosectomy$Inv_Necrosectomy_n, n = data_Inv_Necrosectomy$N, data=data_Inv_Necrosectomy, comb.random=TRUE, studlab=data_Inv_Necrosectomy$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Inv_Necrosectomy$Hemisphere)
+
+pdf(file="Inv_Necrosectomy.pdf", width=10,height = 8) 
+forest.meta(metaprop_Inv_Necrosectomy,layout =   "Revman")
+dev.off()
+
+colnames(data_AP)
+
+
+table_outcomes = data_AP[c("authoryear","year","Hemisphere","Inv_Necrosectomy_n","N","OF_Overall_n","N","Grading_Mild_n","N","Grading_ModeratelySev__Severe_n","N","LocalComplications_Overall_n","N")] 
+
+table_outcomes <- data.frame(data_AP$authoryear, data_AP$year,data_AP$Hemisphere,
+    paste0(
+      data_AP$Inv_Necrosectomy_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Inv_Necrosectomy_n / data_AP$N) * 100,digits = 2),
+      ")"),
+        paste0(
+      data_AP$OF_Overall_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$OF_Overall_n / data_AP$N) * 100,digits = 2),
+      ")"),
+        paste0(
+      data_AP$Grading_Mild_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Grading_Mild_n / data_AP$N) * 100,digits = 2),
+      ")"),
+        paste0(
+      data_AP$Grading_ModeratelySev__Severe_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Grading_ModeratelySev__Severe_n / data_AP$N) * 100,digits = 2),
+      ")"),
+        paste0(
+      data_AP$LocalComplications_Overall_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$LocalComplications_Overall_n / data_AP$N) * 100,digits = 2),
+      ")"))
+
+colnames(table_outcomes) <- c("Author (year)","Year","Hemisphere","Invasive Necrosectomy","Organ Failure (Overall)","Mild Grade AP","Moderate/Severe Grade AP","Local Complications (Overall)")
+
+table_outcomes$`Invasive Necrosectomy`[grep(table_outcomes$`Invasive Necrosectomy`,pattern = "NA")] <- "-"
+
+table_outcomes$`Organ Failure (Overall)`[grep(table_outcomes$`Organ Failure (Overall)`,pattern = "NA")] <- "-"
+
+table_outcomes$`Mild Grade AP`[grep(table_outcomes$`Mild Grade AP`,pattern = "NA")] <- "-"
+
+table_outcomes$`Moderate/Severe Grade AP`[grep(table_outcomes$`Moderate/Severe Grade AP`,pattern = "NA")] <- "-"
+
+table_outcomes$`Local Complications (Overall)`[grep(table_outcomes$`Local Complications (Overall)`,pattern = "NA")] <- "-"
+
+table_outcomes <- table_outcomes[order(table_outcomes$Hemisphere,table_outcomes$Year,decreasing = FALSE),]
+table_outcomes <- table_outcomes[,-2]
+
+colnames(table_outcomes) <- c("Author (year)","Hemisphere","Invasive Necrosectomy [n/N (%)]","Organ Failure (Overall) [n/N (%)]","Mild Grade AP [n/N (%)]","Moderate/Severe Grade AP [n/N (%)]","Local Complications (Overall) [n/N (%)]")
+
+write.csv(table_outcomes,"table_outcomes.csv")
+```
+
+#OF Overall
+```{r}
+data_OF_Overall <-data_AP[c("authoryear","year","OF_Overall_n","N","Hemisphere")] 
+data_OF_Overall
+
+data_OF_Overall<-data_OF_Overall[order(data_OF_Overall$year),]
+data_OF_Overall<-data_OF_Overall[!is.na(data_OF_Overall$OF_Overall_n), ]
+
+metaprop_OF_Overall<-metaprop(event = data_OF_Overall$OF_Overall_n, n = data_OF_Overall$N, data=data_OF_Overall, comb.random=TRUE, studlab=data_OF_Overall$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_OF_Overall$Hemisphere)
+
+pdf(file="OF_Overall.pdf", width=10,height = 8) 
+forest.meta(metaprop_OF_Overall,layout =   "Revman")
+dev.off()
+
+```
+
+#Grading Mild / ModeratelySevSevere
+```{r}
+
+data_Grading_Mild <-data_AP[c("authoryear","year","Grading_Mild_n","N","Hemisphere")] 
+data_Grading_Mild
+
+data_Grading_Mild<-data_Grading_Mild[order(data_Grading_Mild$year),]
+data_Grading_Mild<-data_Grading_Mild[!is.na(data_Grading_Mild$Grading_Mild_n), ]
+
+metaprop_Grading_Mild<-metaprop(event = data_Grading_Mild$Grading_Mild_n, n = data_Grading_Mild$N, data=data_Grading_Mild, comb.random=TRUE, studlab=data_Grading_Mild$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Grading_Mild$Hemisphere)
+
+pdf(file="Grading_Mild.pdf", width=10,height = 8) 
+forest.meta(metaprop_Grading_Mild,layout =   "Revman",colgap.forest = "0.5 cm",xlim = c(0,100))
+dev.off()
+
+
+data_Grading_ModeratelySev__Severe <-data_AP[c("authoryear","year","Grading_ModeratelySev__Severe_n","N","Hemisphere")] 
+data_Grading_ModeratelySev__Severe
+
+data_Grading_ModeratelySev__Severe<-data_Grading_ModeratelySev__Severe[order(data_Grading_ModeratelySev__Severe$year),]
+data_Grading_ModeratelySev__Severe<-data_Grading_ModeratelySev__Severe[!is.na(data_Grading_ModeratelySev__Severe$Grading_ModeratelySev__Severe_n), ]
+
+metaprop_Grading_ModeratelySev__Severe<-metaprop(event = data_Grading_ModeratelySev__Severe$Grading_ModeratelySev__Severe_n, n = data_Grading_ModeratelySev__Severe$N, data=data_Grading_ModeratelySev__Severe, comb.random=TRUE, studlab=data_Grading_ModeratelySev__Severe$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Grading_ModeratelySev__Severe$Hemisphere)
+
+pdf(file="Grading_ModeratelySev__Severe.pdf", width=10,height = 8) 
+forest.meta(metaprop_Grading_ModeratelySev__Severe,layout =   "Revman",colgap.forest = "0.5 cm",xlim = c(0,100))
+dev.off()
+
+
+```
+
+
+#Trimester - First/Second/Third
+```{r}
+
+colnames(data_AP)
+data_Trimester_First <-data_AP[c("authoryear","year","Trimester_First_n","Trimester_N","Hemisphere")] 
+data_Trimester_First
+
+data_Trimester_First<-data_Trimester_First[order(data_Trimester_First$year),]
+data_Trimester_First<-data_Trimester_First[!is.na(data_Trimester_First$Trimester_First_n), ]
+
+metaprop_Trimester_First<-metaprop(event = data_Trimester_First$Trimester_First_n, n = data_Trimester_First$Trimester_N, data=data_Trimester_First, comb.random=TRUE, studlab=data_Trimester_First$authoryear,pscale = 100,comb.fixed = FALSE,byvar=data_Trimester_First$Hemisphere)
+
+pdf(file="Trimester_First.pdf", width=10,height = 8) 
+forest.meta(metaprop_Trimester_First,layout =   "Revman",xlim = c(0,100),colgap.forest = "0.5 cm")
+dev.off()
+
+data_Trimester_Second <-data_AP[c("authoryear","year","Trimester_Second_n","Trimester_N","Hemisphere")] 
+data_Trimester_Second
+
+data_Trimester_Second<-data_Trimester_Second[order(data_Trimester_Second$year),]
+data_Trimester_Second<-data_Trimester_Second[!is.na(data_Trimester_Second$Trimester_Second_n), ]
+
+metaprop_Trimester_Second<-metaprop(event = data_Trimester_Second$Trimester_Second_n, n = data_Trimester_Second$Trimester_N, data=data_Trimester_Second, comb.random=TRUE, studlab=data_Trimester_Second$authoryear,pscale = 100,comb.fixed = FALSE,byvar=data_Trimester_Second$Hemisphere)
+
+pdf(file="Trimester_Second.pdf", width=10,height = 8) 
+forest.meta(metaprop_Trimester_Second,layout =   "Revman",xlim = c(0,100),colgap.forest = "0.5 cm")
+dev.off()
+
+data_Trimester_Third <-data_AP[c("authoryear","year","Trimester_Third_n","Trimester_N","Hemisphere")] 
+data_Trimester_Third
+
+data_Trimester_Third<-data_Trimester_Third[order(data_Trimester_Third$year),]
+data_Trimester_Third<-data_Trimester_Third[!is.na(data_Trimester_Third$Trimester_Third_n), ]
+
+metaprop_Trimester_Third<-metaprop(event = data_Trimester_Third$Trimester_Third_n, n = data_Trimester_Third$Trimester_N, data=data_Trimester_Third, comb.random=TRUE, studlab=data_Trimester_Third$authoryear,pscale = 100,comb.fixed = FALSE,byvar= data_Trimester_Third$Hemisphere)
+
+pdf(file="Trimester_Third.pdf", width=10,height = 8) 
+forest.meta(metaprop_Trimester_Third,layout =   "Revman",xlim = c(0,100),colgap.forest = "0.5 cm")
+dev.off()
+
+
+# "Trimester_First_n","Trimester_N"
+# "Trimester_Second_n","Trimester_N"
+# "Trimester_Third_n","Trimester_N"
+# "Gravida_Primi_n","Gravida_N"
+# "Gravida_Multi_n","Gravida_N"
+# "Delivery_Vaginal_n","Delivery_N"
+# "Delivery_Caesarean_n","Delivery_N"
+
+table_keyinfo <- data.frame(data_AP$authoryear,data_AP$year,data_AP$Hemisphere,
+                            paste0(
+      data_AP$Trimester_First_n,
+      "/",
+      data_AP$Trimester_N,
+      " (",
+      round((data_AP$Trimester_First_n / data_AP$Trimester_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$Trimester_Second_n,
+      "/",
+      data_AP$Trimester_N,
+      " (",
+      round((data_AP$Trimester_Second_n / data_AP$Trimester_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$Trimester_Third_n,
+      "/",
+      data_AP$Trimester_N,
+      " (",
+      round((data_AP$Trimester_Third_n / data_AP$Trimester_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$Gravida_Primi_n,
+      "/",
+      data_AP$Gravida_N,
+      " (",
+      round((data_AP$Gravida_Primi_n / data_AP$Gravida_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$Gravida_Multi_n,
+      "/",
+      data_AP$Gravida_N,
+      " (",
+      round((data_AP$Gravida_Multi_n / data_AP$Gravida_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$Delivery_Vaginal_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Delivery_Vaginal_n / data_AP$N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$Delivery_Caesarean_n,
+      "/",
+      data_AP$N,
+      " (",
+      round((data_AP$Delivery_Caesarean_n / data_AP$N) * 100,digits = 2),
+      ")"))
+
+colnames(table_keyinfo) <- c("Author (year)","Year","Hemisphere","First Trimester","Second Trimester","Third Trimester","Primi-Gravida","Multi-Gravida","Vaginal Delivery","Caesarean Delivery")
+table_keyinfo$`First Trimester`[grep(table_keyinfo$`First Trimester`,pattern = "NA")] <- "-"
+table_keyinfo$`Second Trimester`[grep(table_keyinfo$`Second Trimester`,pattern = "NA")] <- "-"
+table_keyinfo$`Third Trimester`[grep(table_keyinfo$`Third Trimester`,pattern = "NA")] <- "-"
+table_keyinfo$`Primi-Gravida`[grep(table_keyinfo$`Primi-Gravida`,pattern = "NA")] <- "-"
+table_keyinfo$`Multi-Gravida`[grep(table_keyinfo$`Multi-Gravida`,pattern = "NA")] <- "-"
+table_keyinfo$`Vaginal Delivery`[grep(table_keyinfo$`Vaginal Delivery`,pattern = "NA")] <- "-"
+table_keyinfo$`Caesarean Delivery`[grep(table_keyinfo$`Caesarean Delivery`,pattern = "NA")] <- "-"
+
+table_keyinfo = table_keyinfo[order(table_keyinfo$Hemisphere,table_keyinfo$Year,decreasing = FALSE),]
+table_keyinfo <- table_keyinfo[,-2]
+colnames(table_keyinfo) <- c("Author (year)","Hemisphere","First Trimester [n/N (%)]","Second Trimester [n/N (%)]","Third Trimester [n/N (%)]","Primi-Gravida [n/N (%)]","Multi-Gravida [n/N (%)]","Vaginal Delivery [n/N (%)]","Caesarean Delivery [n/N (%)]")
+
+write.csv(table_keyinfo,"table_keyinfo.csv",na = "-")
+```
+
+#Gravida - Primi/Multi
+```{r}
+data_Gravida_Primi <-data_AP[c("authoryear","year","Gravida_Primi_n","Gravida_N","Hemisphere")] 
+data_Gravida_Primi
+
+data_Gravida_Primi<-data_Gravida_Primi[order(data_Gravida_Primi$year),]
+data_Gravida_Primi<-data_Gravida_Primi[!is.na(data_Gravida_Primi$Gravida_Primi_n), ]
+
+metaprop_Gravida_Primi<-metaprop(event = data_Gravida_Primi$Gravida_Primi_n, n = data_Gravida_Primi$Gravida_N, data=data_Gravida_Primi, comb.random=TRUE, studlab=data_Gravida_Primi$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Gravida_Primi$Hemisphere)
+
+pdf(file="Gravida_Primi.pdf", width=10,height = 8) 
+forest.meta(metaprop_Gravida_Primi,layout =   "Revman",xlim = c(0,100),colgap.forest = "0.5 cm")
+dev.off()
+
+
+data_Gravida_Multi <-data_AP[c("authoryear","year","Gravida_Multi_n","Gravida_N","Hemisphere")] 
+data_Gravida_Multi
+
+data_Gravida_Multi<-data_Gravida_Multi[order(data_Gravida_Multi$year),]
+data_Gravida_Multi<-data_Gravida_Multi[!is.na(data_Gravida_Multi$Gravida_Multi_n), ]
+
+metaprop_Gravida_Multi<-metaprop(event = data_Gravida_Multi$Gravida_Multi_n, n = data_Gravida_Multi$Gravida_N, data=data_Gravida_Multi, comb.random=TRUE, studlab=data_Gravida_Multi$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Gravida_Multi$Hemisphere)
+
+pdf(file="Gravida_Multi.pdf", width=10,height = 8) 
+forest.meta(metaprop_Gravida_Multi,layout =   "Revman",xlim = c(0,100),colgap.forest = "0.5 cm")
+dev.off()
+
+```
+
+
+#Maternal Mortality
+```{r}
+data_Maternal_Mortality <-data_AP[c("authoryear","year","Maternal_Mortality_n","N","Hemisphere")] 
+data_Maternal_Mortality
+
+data_Maternal_Mortality<-data_Maternal_Mortality[order(data_Maternal_Mortality$year),]
+data_Maternal_Mortality<-data_Maternal_Mortality[!is.na(data_Maternal_Mortality$Maternal_Mortality_n), ]
+
+
+
+metaprop_Maternal_Mortality<-metaprop(event = data_Maternal_Mortality$Maternal_Mortality_n, n = data_Maternal_Mortality$N, data=data_Maternal_Mortality, comb.random=TRUE, studlab=data_Maternal_Mortality$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Maternal_Mortality$Hemisphere)
+
+pdf(file="Maternal_Mortality.pdf", width=10,height = 8) 
+forest.meta(metaprop_Maternal_Mortality,layout =   "Revman",xlim=c(0,50))
+dev.off()
+
+
+
+pdf(file="Funnel_MaternalMortality.pdf", width=10,height = 8) 
+funnel(trimfill(metaprop_Maternal_Mortality))
+dev.off()
+
+
+##Excluding Gilbert study
+
+data_Maternal_Mortality_2 =data_Maternal_Mortality[data_Maternal_Mortality$authoryear !="Gilbert A et al 2014",]
+data_Maternal_Mortality_2<-data_Maternal_Mortality_2[order(data_Maternal_Mortality_2$year),]
+data_Maternal_Mortality_2<-data_Maternal_Mortality_2[!is.na(data_Maternal_Mortality_2$Maternal_Mortality_n), ]
+
+metaprop_Maternal_Mortality_2<-metaprop(event = data_Maternal_Mortality_2$Maternal_Mortality_n, n = data_Maternal_Mortality_2$N, data=data_Maternal_Mortality_2, comb.random=TRUE, studlab=data_Maternal_Mortality_2$authoryear,pscale = 100,comb.fixed = FALSE)
+
+pdf(file="Maternal_Mortality_2.pdf", width=10,height = 8) 
+forest.meta(metaprop_Maternal_Mortality_2,layout =   "Revman")
+dev.off()
+
+
+pdf(file="Funnel_Maternal_Mortality_2.pdf", width=10,height = 8) 
+funnel(trimfill(metaprop_Maternal_Mortality_2))
+dev.off()
+
+# data_Maternal_Mortality$SampleSize=ifelse(test = data_Maternal_Mortality$N>100,yes = 1,no = 0)
+# 
+# library(metafor)
+# ess_Maternal_Mortality<-escalc(measure="PLO", xi=data_Maternal_Mortality$Maternal_Mortality_n,ni=data_Maternal_Mortality$N)
+# meta_SampleSize_Maternal_Mortality<-rma(ess_Maternal_Mortality$yi,ess_Maternal_Mortality$vi,mods=~data_Maternal_Mortality$SampleSize,method="ML")
+# meta_SampleSize_Maternal_Mortality
+# 
+# data_Maternal_Mortality$YearofPublication=ifelse(test = data_Maternal_Mortality$year>2010,yes = 1,no = 0)
+# meta_YearofPublication_Maternal_Mortality<-rma(ess_Maternal_Mortality$yi,ess_Maternal_Mortality$vi,mods=~data_Maternal_Mortality$YearofPublication,method="ML")
+# meta_YearofPublication_Maternal_Mortality
+
+
+```
+
+#Delivery Vaginal
+```{r}
+colnames(data_AP)
+data_Delivery_Vaginal <-data_AP[c("authoryear","year","Delivery_Vaginal_n","Delivery_N","Hemisphere")] 
+data_Delivery_Vaginal
+
+data_Delivery_Vaginal<-data_Delivery_Vaginal[order(data_Delivery_Vaginal$year),]
+data_Delivery_Vaginal<-data_Delivery_Vaginal[!is.na(data_Delivery_Vaginal$Delivery_Vaginal_n), ]
+
+metaprop_Delivery_Vaginal<-metaprop(event = data_Delivery_Vaginal$Delivery_Vaginal_n, n = data_Delivery_Vaginal$Delivery_N, data=data_Delivery_Vaginal, comb.random=TRUE, studlab=data_Delivery_Vaginal$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_Delivery_Vaginal$Hemisphere)
+
+pdf(file="Delivery_Vaginal.pdf", width=10,height = 8) 
+forest.meta(metaprop_Delivery_Vaginal,layout =   "Revman",xlim = c(0,100),colgap.forest = "0.5 cm")
+dev.off()
+
+
+data_Delivery_Caesarean <-data_AP[c("authoryear","year","Delivery_Caesarean_n","Delivery_N","Hemisphere")] 
+data_Delivery_Caesarean
+
+data_Delivery_Caesarean<-data_Delivery_Caesarean[order(data_Delivery_Caesarean$year),]
+data_Delivery_Caesarean<-data_Delivery_Caesarean[!is.na(data_Delivery_Caesarean$Delivery_Caesarean_n), ]
+
+metaprop_Delivery_Caesarean<-metaprop(event = data_Delivery_Caesarean$Delivery_Caesarean_n, n = data_Delivery_Caesarean$Delivery_N, data=data_Delivery_Caesarean, comb.random=TRUE, studlab=data_Delivery_Caesarean$authoryear,pscale = 100,comb.fixed = FALSE,byvar =data_Delivery_Caesarean$Hemisphere )
+
+pdf(file="Delivery_Caesarean.pdf", width=10,height = 8) 
+forest.meta(metaprop_Delivery_Caesarean,layout =   "Revman",xlim = c(0,100),colgap.forest = "0.5 cm")
+dev.off()
+
+```
+
+
+#Total Complications Overall
+```{r}
+
+colnames(data_AP)
+data_LocalComplications_Overall <-data_AP[c("authoryear","year","LocalComplications_Overall_n","N","Hemisphere")] 
+data_LocalComplications_Overall
+
+data_LocalComplications_Overall<-data_LocalComplications_Overall[order(data_LocalComplications_Overall$year),]
+data_LocalComplications_Overall<-data_LocalComplications_Overall[!is.na(data_LocalComplications_Overall$LocalComplications_Overall_n), ]
+
+metaprop_LocalComplications_Overall<-metaprop(event = data_LocalComplications_Overall$LocalComplications_Overall_n, n = data_LocalComplications_Overall$N, data=data_LocalComplications_Overall, comb.random=TRUE, studlab=data_LocalComplications_Overall$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_LocalComplications_Overall$Hemisphere)
+
+pdf(file="LocalComplications_Overall.pdf", width=10,height = 8) 
+forest.meta(metaprop_LocalComplications_Overall,layout =   "Revman",xlim = c(0,100))
+dev.off()
+```
+
+#Foetal Outcome Normal/Preterm/Foetal Loss/Foetal Still Birth/Induced Abortion/Adverse Foetal Outcome/Neonatal Death
+
+##Normal
+```{r}
+colnames(data_AP)
+data_FetalOutcome_Normal <-data_AP[c("authoryear","year","FetalOutcome_Normal_n","FetalOutcome_N","Hemisphere")] 
+data_FetalOutcome_Normal
+
+data_FetalOutcome_Normal<-data_FetalOutcome_Normal[order(data_FetalOutcome_Normal$year),]
+data_FetalOutcome_Normal<-data_FetalOutcome_Normal[!is.na(data_FetalOutcome_Normal$FetalOutcome_Normal_n), ]
+
+metaprop_FetalOutcome_Normal<-metaprop(event = data_FetalOutcome_Normal$FetalOutcome_Normal_n, n = data_FetalOutcome_Normal$FetalOutcome_N, data=data_FetalOutcome_Normal, comb.random=TRUE, studlab=data_FetalOutcome_Normal$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_FetalOutcome_Normal$Hemisphere)
+
+pdf(file="FetalOutcome_Normal.pdf", width=10,height = 8) 
+forest.meta(metaprop_FetalOutcome_Normal,layout =   "Revman",colgap.forest = "0.5 cm")
+dev.off()
+
+
+# "authoryear","year","FetalOutcome_Normal_n","FetalOutcome_N","Hemisphere","FetalOutcome_Preterm_n","FetalOutcome_N","FetalOutcome_FetalLossTotal_n","FetalOutcome_N","FetalOutcome_FetalDeathStillBirth_n","FetalOutcome_N","FetalOutcome_Induced_Abortion_n","FetalOutcome_N","FetalOutcome_AdverseFetalOutcome_n","FetalOutcome_N"
+
+
+table_outcomes_fetal = data.frame(data_AP$authoryear,data_AP$year,data_AP$Hemisphere,
+                                  paste0(
+      data_AP$FetalOutcome_Normal_n,
+      "/",
+      data_AP$FetalOutcome_N,
+      " (",
+      round((data_AP$FetalOutcome_Normal_n / data_AP$FetalOutcome_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$FetalOutcome_Preterm_n,
+      "/",
+      data_AP$FetalOutcome_N,
+      " (",
+      round((data_AP$FetalOutcome_Preterm_n / data_AP$FetalOutcome_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$FetalOutcome_FetalLossTotal_n,
+      "/",
+      data_AP$FetalOutcome_N,
+      " (",
+      round((data_AP$FetalOutcome_FetalLossTotal_n / data_AP$FetalOutcome_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$FetalOutcome_FetalDeathStillBirth_n,
+      "/",
+      data_AP$FetalOutcome_N,
+      " (",
+      round((data_AP$FetalOutcome_FetalDeathStillBirth_n / data_AP$FetalOutcome_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$FetalOutcome_Induced_Abortion_n,
+      "/",
+      data_AP$FetalOutcome_N,
+      " (",
+      round((data_AP$FetalOutcome_Induced_Abortion_n / data_AP$FetalOutcome_N) * 100,digits = 2),
+      ")"),
+      paste0(
+      data_AP$FetalOutcome_AdverseFetalOutcome_n,
+      "/",
+      data_AP$FetalOutcome_N,
+      " (",
+      round((data_AP$FetalOutcome_AdverseFetalOutcome_n / data_AP$FetalOutcome_N) * 100,digits = 2),
+      ")"))
+
+colnames(table_outcomes_fetal) <- c("Author (year)","Year","Hemisphere","Normal - Foetal Outcome","Preterm","Total Foetal Loss","Death Still Birth","Induced Abortion","Adverse Foetal Outcome")
+table_outcomes_fetal$`Normal - Foetal Outcome`[grep(table_outcomes_fetal$`Normal - Foetal Outcome`,pattern = "NA")] <- "-"
+table_outcomes_fetal$Preterm[grep(table_outcomes_fetal$Preterm,pattern = "NA")] <- "-"
+table_outcomes_fetal$`Total Foetal Loss`[grep(table_outcomes_fetal$`Total Foetal Loss`,pattern = "NA")] <- "-"
+table_outcomes_fetal$`Death Still Birth`[grep(table_outcomes_fetal$`Death Still Birth`,pattern = "NA")] <- "-"
+table_outcomes_fetal$`Induced Abortion`[grep(table_outcomes_fetal$`Induced Abortion`,pattern = "NA")] <- "-"
+table_outcomes_fetal$`Adverse Foetal Outcome`[grep(table_outcomes_fetal$`Adverse Foetal Outcome`,pattern = "NA")] <- "-"
+table_outcomes_fetal <- table_outcomes_fetal[order(table_outcomes_fetal$Hemisphere,table_outcomes_fetal$Year,decreasing = FALSE),]
+
+table_outcomes_fetal<- table_outcomes_fetal[,-2]
+colnames(table_outcomes_fetal) <- c("Author (year)","Hemisphere","Normal - Foetal Outcome [n/N (%)]","Preterm [n/N (%)]","Total Foetal Loss [n/N (%)]","Death Still Birth [n/N (%)]","Induced Abortion [n/N (%)]","Adverse Foetal Outcome [n/N (%)]")
+
+write.csv(table_outcomes_fetal,"table_outcomes_fetal.csv",na = "-")
+```
+
+##Preterm
+```{r}
+data_FetalOutcome_Preterm <-data_AP[c("authoryear","year","FetalOutcome_Preterm_n","FetalOutcome_N","Hemisphere")] 
+data_FetalOutcome_Preterm
+
+data_FetalOutcome_Preterm<-data_FetalOutcome_Preterm[order(data_FetalOutcome_Preterm$year),]
+data_FetalOutcome_Preterm<-data_FetalOutcome_Preterm[!is.na(data_FetalOutcome_Preterm$FetalOutcome_Preterm_n), ]
+
+metaprop_FetalOutcome_Preterm<-metaprop(event = data_FetalOutcome_Preterm$FetalOutcome_Preterm_n, n = data_FetalOutcome_Preterm$FetalOutcome_N, data=data_FetalOutcome_Preterm, comb.random=TRUE, studlab=data_FetalOutcome_Preterm$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_FetalOutcome_Preterm$Hemisphere)
+
+pdf(file="FetalOutcome_Preterm.pdf", width=10,height = 8) 
+forest.meta(metaprop_FetalOutcome_Preterm,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,100))
+dev.off()
+
+```
+
+##Foetal loss
+```{r}
+data_FetalOutcome_FetalLossTotal <-data_AP[c("authoryear","year","FetalOutcome_FetalLossTotal_n","FetalOutcome_N","Hemisphere")] 
+data_FetalOutcome_FetalLossTotal
+
+data_FetalOutcome_FetalLossTotal<-data_FetalOutcome_FetalLossTotal[order(data_FetalOutcome_FetalLossTotal$year),]
+data_FetalOutcome_FetalLossTotal<-data_FetalOutcome_FetalLossTotal[!is.na(data_FetalOutcome_FetalLossTotal$FetalOutcome_FetalLossTotal_n), ]
+
+metaprop_FetalOutcome_FetalLossTotal<-metaprop(event = data_FetalOutcome_FetalLossTotal$FetalOutcome_FetalLossTotal_n, n = data_FetalOutcome_FetalLossTotal$FetalOutcome_N, data=data_FetalOutcome_FetalLossTotal, comb.random=TRUE, studlab=data_FetalOutcome_FetalLossTotal$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_FetalOutcome_FetalLossTotal$Hemisphere)
+
+pdf(file="FetalOutcome_FetalLossTotal.pdf", width=10,height = 8) 
+forest.meta(metaprop_FetalOutcome_FetalLossTotal,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,100))
+dev.off()
+
+```
+
+##Foetal Still Birth
+```{r}
+
+data_FetalOutcome_FetalDeathStillBirth <-data_AP[c("authoryear","year","FetalOutcome_FetalDeathStillBirth_n","FetalOutcome_N","Hemisphere")] 
+data_FetalOutcome_FetalDeathStillBirth
+
+data_FetalOutcome_FetalDeathStillBirth<-data_FetalOutcome_FetalDeathStillBirth[order(data_FetalOutcome_FetalDeathStillBirth$year),]
+data_FetalOutcome_FetalDeathStillBirth<-data_FetalOutcome_FetalDeathStillBirth[!is.na(data_FetalOutcome_FetalDeathStillBirth$FetalOutcome_FetalDeathStillBirth_n), ]
+
+metaprop_FetalOutcome_FetalDeathStillBirth<-metaprop(event = data_FetalOutcome_FetalDeathStillBirth$FetalOutcome_FetalDeathStillBirth_n, n = data_FetalOutcome_FetalDeathStillBirth$FetalOutcome_N, data=data_FetalOutcome_FetalDeathStillBirth, comb.random=TRUE, studlab=data_FetalOutcome_FetalDeathStillBirth$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_FetalOutcome_FetalDeathStillBirth$Hemisphere)
+
+pdf(file="FetalOutcome_FetalDeathStillBirth.pdf", width=10,height = 8) 
+forest.meta(metaprop_FetalOutcome_FetalDeathStillBirth,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,100))
+dev.off()
+
+```
+
+
+##Induced Abortion
+```{r}
+data_FetalOutcome_Induced_Abortion <-data_AP[c("authoryear","year","FetalOutcome_Induced_Abortion_n","FetalOutcome_N","Hemisphere")] 
+data_FetalOutcome_Induced_Abortion
+
+data_FetalOutcome_Induced_Abortion<-data_FetalOutcome_Induced_Abortion[order(data_FetalOutcome_Induced_Abortion$year),]
+data_FetalOutcome_Induced_Abortion<-data_FetalOutcome_Induced_Abortion[!is.na(data_FetalOutcome_Induced_Abortion$FetalOutcome_Induced_Abortion_n), ]
+
+metaprop_FetalOutcome_Induced_Abortion<-metaprop(event = data_FetalOutcome_Induced_Abortion$FetalOutcome_Induced_Abortion_n, n = data_FetalOutcome_Induced_Abortion$FetalOutcome_N, data=data_FetalOutcome_Induced_Abortion, comb.random=TRUE, studlab=data_FetalOutcome_Induced_Abortion$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_FetalOutcome_Induced_Abortion$Hemisphere)
+
+pdf(file="FetalOutcome_Induced_Abortion.pdf", width=10,height = 8) 
+forest.meta(metaprop_FetalOutcome_Induced_Abortion,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,100))
+dev.off()
+```
+
+
+##Adverse Foetal Outcome
+```{r}
+
+data_FetalOutcome_AdverseFetalOutcome <-data_AP[c("authoryear","year","FetalOutcome_AdverseFetalOutcome_n","FetalOutcome_N","Hemisphere")] 
+data_FetalOutcome_AdverseFetalOutcome
+
+data_FetalOutcome_AdverseFetalOutcome<-data_FetalOutcome_AdverseFetalOutcome[order(data_FetalOutcome_AdverseFetalOutcome$year),]
+data_FetalOutcome_AdverseFetalOutcome<-data_FetalOutcome_AdverseFetalOutcome[!is.na(data_FetalOutcome_AdverseFetalOutcome$FetalOutcome_AdverseFetalOutcome_n), ]
+
+metaprop_FetalOutcome_AdverseFetalOutcome<-metaprop(event = data_FetalOutcome_AdverseFetalOutcome$FetalOutcome_AdverseFetalOutcome_n, n = data_FetalOutcome_AdverseFetalOutcome$FetalOutcome_N, data=data_FetalOutcome_AdverseFetalOutcome, comb.random=TRUE, studlab=data_FetalOutcome_AdverseFetalOutcome$authoryear,pscale = 100,comb.fixed = FALSE,byvar = data_FetalOutcome_AdverseFetalOutcome$Hemisphere)
+
+pdf(file="FetalOutcome_AdverseFetalOutcome.pdf", width=10,height = 8) 
+forest.meta(metaprop_FetalOutcome_AdverseFetalOutcome,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,100))
+dev.off()
+
+library(meta)
+pdf(file="Funnel_AdverseFetalOutcome.pdf", width=10,height = 8) 
+metafor::funnel(trimfill(metaprop_FetalOutcome_AdverseFetalOutcome))
+dev.off()
+
+```
+
+##Neonatal death
+```{r}
+
+data_Neonatal_Death <-data_AP[c("authoryear","year","Neonatal_Death_n","Neonatal_LiveBirth_N","Hemisphere")] 
+data_Neonatal_Death
+
+data_Neonatal_Death<-data_Neonatal_Death[order(data_Neonatal_Death$year),]
+data_Neonatal_Death<-data_Neonatal_Death[!is.na(data_Neonatal_Death$Neonatal_Death_n), ]
+
+metaprop_Neonatal_Death<-metaprop(event = data_Neonatal_Death$Neonatal_Death_n, n = data_Neonatal_Death$Neonatal_LiveBirth_N, data=data_Neonatal_Death, comb.random=TRUE, studlab=data_Neonatal_Death$authoryear,pscale = 100,comb.fixed = FALSE,byvar= data_Neonatal_Death$Hemisphere)
+
+pdf(file="Neonatal_Death.pdf", width=10,height = 8) 
+forest.meta(metaprop_Neonatal_Death,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,50))
+dev.off()
+```
+
+
+#Reading of excel - data_AP_2
+```{r}
+data_AP_2 <- read_excel("AP and Pregnancy Metaanalysis Data-Praveen Analysis.xlsx", 
+     sheet = "Sheet6")
+
+```
+
+#Foetal Outcome Compare - Severe vs Non-severe
+```{r}
+data_AP_2$authoryear<-paste(data_AP_2$author,data_AP_2$year,sep = " ")
+# View(data_AP)
+data_AP_2
+colnames(data_AP_2)
+
+data_AP_2<-data_AP_2[order(data_AP_2$year),]
+
+data_SevvsNonsev_Compare_byVar_Severe<-data_AP_2[,c("authoryear","FetalOutcome_Severe_n","Severe_N")]
+data_SevvsNonsev_Compare_byVar_Severe<-data_SevvsNonsev_Compare_byVar_Severe[!is.na(data_SevvsNonsev_Compare_byVar_Severe$FetalOutcome_Severe_n), ]
+
+data_SevvsNonsev_Compare_byVar_Severe$group<-"Moderately severe & Severe"
+colnames(data_SevvsNonsev_Compare_byVar_Severe)
+colnames(data_SevvsNonsev_Compare_byVar_Severe)<-c("author","n", "N", "group")
+
+data_SevvsNonsev_Compare_byVar_Nonsevere<-data_AP_2[,c("authoryear","FetalOutcome_Nonsevere_n","Nonsevere_N")]
+data_SevvsNonsev_Compare_byVar_Nonsevere<-data_SevvsNonsev_Compare_byVar_Nonsevere[!is.na(data_SevvsNonsev_Compare_byVar_Nonsevere$FetalOutcome_Nonsevere_n), ]
+
+data_SevvsNonsev_Compare_byVar_Nonsevere$group<-"Mild"
+colnames(data_SevvsNonsev_Compare_byVar_Nonsevere)
+colnames(data_SevvsNonsev_Compare_byVar_Nonsevere)<-c("author","n", "N", "group")
+
+
+data_SevvsNonsev_Compare_FO_byVar<-rbind(data_SevvsNonsev_Compare_byVar_Severe,data_SevvsNonsev_Compare_byVar_Nonsevere)
+
+data_SevvsNonsev_Compare_FO_byVar<-data.frame(data_SevvsNonsev_Compare_FO_byVar)
+metaprop_SevvsNonsev_Compare_FO_byVar<-metaprop(event = n, n = N,data = data_SevvsNonsev_Compare_FO_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 100,byvar = group)
+
+pdf(file="SevvsNonsev_Compare_FO_byVar.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_SevvsNonsev_Compare_FO_byVar,layout =   "Revman", colgap.forest = "1.5 cm",xlim=c(0,100))
+dev.off()
+
+data_SevvsNonsev_Compare <-data_AP_2[c("authoryear","FetalOutcome_Severe_n", "Severe_N",               "FetalOutcome_Nonsevere_n", "Nonsevere_N")]
+
+data_SevvsNonsev_Compare
+
+data_SevvsNonsev_Compare<-data_SevvsNonsev_Compare[!is.na(data_SevvsNonsev_Compare$FetalOutcome_Severe_n)&!is.na(data_SevvsNonsev_Compare$FetalOutcome_Nonsevere_n),]
+data_SevvsNonsev_Compare
+
+metaprop_SevvsNonsev_Compare<-metabin(event.e = data_SevvsNonsev_Compare$FetalOutcome_Severe_n,n.e = data_SevvsNonsev_Compare$Severe_N,event.c = data_SevvsNonsev_Compare$FetalOutcome_Nonsevere_n,n.c = data_SevvsNonsev_Compare$Nonsevere_N,studlab = authoryear,data = data_SevvsNonsev_Compare,sm = "RR",comb.fixed = FALSE,label.e = "Mod Sev & Sev",label.c = "Mild")
+  
+pdf(file="data_SevvsNonsev_FO_Compare.pdf", width=10,height = 5) 
+forest.meta(metaprop_SevvsNonsev_Compare,layout =  "Revman")
+dev.off()
+
+```
+
+```{r}
+# data_AP_3 <- read_excel("AP and Pregnancy Metaanalysis Data-Praveen Analysis.xlsx", 
+#      sheet = "Sheet7")
+# 
+# data_AP_3$authoryear<-paste(data_AP_3$author,data_AP_3$year,sep = " ")
+# # View(data_AP)
+# data_AP_3
+# colnames(data_AP_3)
+# 
+# data_AP_3<-data_AP_3[order(data_AP_3$authoryear),]
+# 
+# data_SevvsNonsevFirstTrimester_Compare_byVar_Severe<-data_AP_3[,c("author","FirstTrimester_ModSev_n","FirstTrimester_ModSev_N")]
+# data_SevvsNonsevFirstTrimester_Compare_byVar_Severe<-data_SevvsNonsevFirstTrimester_Compare_byVar_Severe[!is.na(data_SevvsNonsevFirstTrimester_Compare_byVar_Severe$FirstTrimester_ModSev_n), ]
+# 
+# data_SevvsNonsevFirstTrimester_Compare_byVar_Severe$group<-"Moderately severe & Severe"
+# colnames(data_SevvsNonsevFirstTrimester_Compare_byVar_Severe)
+# colnames(data_SevvsNonsevFirstTrimester_Compare_byVar_Severe)<-c("author","n", "N", "group")
+# 
+# data_SevvsNonsevFirstTrimester_Compare_byVar_Nonsevere<-data_AP_3[,c("author","FirstTrimester_Mild_n","FirstTrimester_Mild_N")]
+# data_SevvsNonsevFirstTrimester_Compare_byVar_Nonsevere<-data_SevvsNonsevFirstTrimester_Compare_byVar_Nonsevere[!is.na(data_SevvsNonsevFirstTrimester_Compare_byVar_Nonsevere$FirstTrimester_Mild_n), ]
+# 
+# data_SevvsNonsevFirstTrimester_Compare_byVar_Nonsevere$group<-"Mild"
+# colnames(data_SevvsNonsevFirstTrimester_Compare_byVar_Nonsevere)
+# colnames(data_SevvsNonsevFirstTrimester_Compare_byVar_Nonsevere)<-c("author","n", "N", "group")
+# 
+# 
+# data_SevvsNonsevFirstTrimester_Compare_byVar<-rbind(data_SevvsNonsevFirstTrimester_Compare_byVar_Severe,data_SevvsNonsevFirstTrimester_Compare_byVar_Nonsevere)
+# 
+# data_SevvsNonsevFirstTrimester_Compare_byVar<-data.frame(data_SevvsNonsevFirstTrimester_Compare_byVar)
+# metaprop_SevvsNonsevFirstTrimester_Compare_byVar<-metaprop(event = n, n = N,data = data_SevvsNonsevFirstTrimester_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 100,byvar = group)
+# 
+# pdf(file="SevvsNonsevFirstTrimester_Compare_byVar.pdf", width=11,height = 12) 
+# forest.meta(
+# metaprop_SevvsNonsevFirstTrimester_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+# dev.off()
+# 
+# data_SevvsNonsevFirstTrimester_Compare <-data_AP_3[c("authoryear","FirstTrimester_ModSev_n", "FirstTrimester_ModSev_N",               "FirstTrimester_Mild_n", "FirstTrimester_Mild_N")]
+# 
+# data_SevvsNonsevFirstTrimester_Compare
+# 
+# data_SevvsNonsevFirstTrimester_Compare<-data_SevvsNonsevFirstTrimester_Compare[!is.na(data_SevvsNonsevFirstTrimester_Compare$FirstTrimester_ModSev_n)&!is.na(data_SevvsNonsevFirstTrimester_Compare$FirstTrimester_Mild_n),]
+# data_SevvsNonsevFirstTrimester_Compare
+# 
+# metaprop_SevvsNonsevFirstTrimester_Compare<-metabin(event.e = data_SevvsNonsevFirstTrimester_Compare$FirstTrimester_ModSev_n,n.e = data_SevvsNonsevFirstTrimester_Compare$FirstTrimester_ModSev_N,event.c = data_SevvsNonsevFirstTrimester_Compare$FirstTrimester_Mild_n,n.c = data_SevvsNonsevFirstTrimester_Compare$FirstTrimester_Mild_N,studlab = authoryear,data = data_SevvsNonsevFirstTrimester_Compare,sm = "RR",comb.fixed = FALSE,label.e = "Mod Sev & Sev",label.c = "Mild")
+#   
+# pdf(file="SevvsNonsevFirstTrimester_Compare.pdf", width=10,height = 5) 
+# forest.meta(metaprop_SevvsNonsevFirstTrimester_Compare,layout =  "Revman")
+# dev.off()
+# 
+# 
+# data_SevvsNonsevSecondTrimester_Compare_byVar_Severe<-data_AP_3[,c("author","SecondTrimester_ModSev_n","SecondTrimester_ModSev_N")]
+# data_SevvsNonsevSecondTrimester_Compare_byVar_Severe<-data_SevvsNonsevSecondTrimester_Compare_byVar_Severe[!is.na(data_SevvsNonsevSecondTrimester_Compare_byVar_Severe$SecondTrimester_ModSev_n), ]
+# 
+# data_SevvsNonsevSecondTrimester_Compare_byVar_Severe$group<-"Moderately severe & Severe"
+# colnames(data_SevvsNonsevSecondTrimester_Compare_byVar_Severe)
+# colnames(data_SevvsNonsevSecondTrimester_Compare_byVar_Severe)<-c("author","n", "N", "group")
+# 
+# data_SevvsNonsevSecondTrimester_Compare_byVar_Nonsevere<-data_AP_3[,c("author","SecondTrimester_Mild_n","SecondTrimester_Mild_N")]
+# data_SevvsNonsevSecondTrimester_Compare_byVar_Nonsevere<-data_SevvsNonsevSecondTrimester_Compare_byVar_Nonsevere[!is.na(data_SevvsNonsevSecondTrimester_Compare_byVar_Nonsevere$SecondTrimester_Mild_n), ]
+# 
+# data_SevvsNonsevSecondTrimester_Compare_byVar_Nonsevere$group<-"Mild"
+# colnames(data_SevvsNonsevSecondTrimester_Compare_byVar_Nonsevere)
+# colnames(data_SevvsNonsevSecondTrimester_Compare_byVar_Nonsevere)<-c("author","n", "N", "group")
+# 
+# 
+# data_SevvsNonsevSecondTrimester_Compare_byVar<-rbind(data_SevvsNonsevSecondTrimester_Compare_byVar_Severe,data_SevvsNonsevSecondTrimester_Compare_byVar_Nonsevere)
+# 
+# data_SevvsNonsevSecondTrimester_Compare_byVar<-data.frame(data_SevvsNonsevSecondTrimester_Compare_byVar)
+# metaprop_SevvsNonsevSecondTrimester_Compare_byVar<-metaprop(event = n, n = N,data = data_SevvsNonsevSecondTrimester_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 100,byvar = group)
+# 
+# pdf(file="SevvsNonsevSecondTrimester_Compare_byVar.pdf", width=11,height = 12) 
+# forest.meta(
+# metaprop_SevvsNonsevSecondTrimester_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+# dev.off()
+# 
+# data_SevvsNonsevSecondTrimester_Compare <-data_AP_3[c("authoryear","SecondTrimester_ModSev_n", "SecondTrimester_ModSev_N",               "SecondTrimester_Mild_n", "SecondTrimester_Mild_N")]
+# 
+# data_SevvsNonsevSecondTrimester_Compare
+# 
+# data_SevvsNonsevSecondTrimester_Compare<-data_SevvsNonsevSecondTrimester_Compare[!is.na(data_SevvsNonsevSecondTrimester_Compare$SecondTrimester_ModSev_n)&!is.na(data_SevvsNonsevSecondTrimester_Compare$SecondTrimester_Mild_n),]
+# data_SevvsNonsevSecondTrimester_Compare
+# 
+# metaprop_SevvsNonsevSecondTrimester_Compare<-metabin(event.e = data_SevvsNonsevSecondTrimester_Compare$SecondTrimester_ModSev_n,n.e = data_SevvsNonsevSecondTrimester_Compare$SecondTrimester_ModSev_N,event.c = data_SevvsNonsevSecondTrimester_Compare$SecondTrimester_Mild_n,n.c = data_SevvsNonsevSecondTrimester_Compare$SecondTrimester_Mild_N,studlab = authoryear,data = data_SevvsNonsevSecondTrimester_Compare,sm = "RR",comb.fixed = FALSE,label.e = "Mod Sev & Sev",label.c = "Mild")
+#   
+# pdf(file="SevvsNonsevSecondTrimester_Compare.pdf", width=10,height = 5) 
+# forest.meta(metaprop_SevvsNonsevSecondTrimester_Compare,layout =  "Revman")
+# dev.off()
+# 
+# data_SevvsNonsevThirdTrimester_Compare_byVar_Severe<-data_AP_3[,c("author","ThirdTrimester_ModSev_n","ThirdTrimester_ModSev_N")]
+# data_SevvsNonsevThirdTrimester_Compare_byVar_Severe<-data_SevvsNonsevThirdTrimester_Compare_byVar_Severe[!is.na(data_SevvsNonsevThirdTrimester_Compare_byVar_Severe$ThirdTrimester_ModSev_n), ]
+# 
+# data_SevvsNonsevThirdTrimester_Compare_byVar_Severe$group<-"Moderately severe & Severe"
+# colnames(data_SevvsNonsevThirdTrimester_Compare_byVar_Severe)
+# colnames(data_SevvsNonsevThirdTrimester_Compare_byVar_Severe)<-c("author","n", "N", "group")
+# 
+# data_SevvsNonsevThirdTrimester_Compare_byVar_Nonsevere<-data_AP_3[,c("author","ThirdTrimester_Mild_n","ThirdTrimester_Mild_N")]
+# data_SevvsNonsevThirdTrimester_Compare_byVar_Nonsevere<-data_SevvsNonsevThirdTrimester_Compare_byVar_Nonsevere[!is.na(data_SevvsNonsevThirdTrimester_Compare_byVar_Nonsevere$ThirdTrimester_Mild_n), ]
+# 
+# data_SevvsNonsevThirdTrimester_Compare_byVar_Nonsevere$group<-"Mild"
+# colnames(data_SevvsNonsevThirdTrimester_Compare_byVar_Nonsevere)
+# colnames(data_SevvsNonsevThirdTrimester_Compare_byVar_Nonsevere)<-c("author","n", "N", "group")
+# 
+# 
+# data_SevvsNonsevThirdTrimester_Compare_byVar<-rbind(data_SevvsNonsevThirdTrimester_Compare_byVar_Severe,data_SevvsNonsevThirdTrimester_Compare_byVar_Nonsevere)
+# 
+# data_SevvsNonsevThirdTrimester_Compare_byVar<-data.frame(data_SevvsNonsevThirdTrimester_Compare_byVar)
+# metaprop_SevvsNonsevThirdTrimester_Compare_byVar<-metaprop(event = n, n = N,data = data_SevvsNonsevThirdTrimester_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 100,byvar = group)
+# 
+# pdf(file="SevvsNonsevThirdTrimester_Compare_byVar.pdf", width=11,height = 12) 
+# forest.meta(
+# metaprop_SevvsNonsevThirdTrimester_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+# dev.off()
+# 
+# data_SevvsNonsevThirdTrimester_Compare <-data_AP_3[c("authoryear","ThirdTrimester_ModSev_n", "ThirdTrimester_ModSev_N",               "ThirdTrimester_Mild_n", "ThirdTrimester_Mild_N")]
+# 
+# data_SevvsNonsevThirdTrimester_Compare
+# 
+# data_SevvsNonsevThirdTrimester_Compare<-data_SevvsNonsevThirdTrimester_Compare[!is.na(data_SevvsNonsevThirdTrimester_Compare$ThirdTrimester_ModSev_n)&!is.na(data_SevvsNonsevThirdTrimester_Compare$ThirdTrimester_Mild_n),]
+# data_SevvsNonsevThirdTrimester_Compare
+# 
+# metaprop_SevvsNonsevThirdTrimester_Compare<-metabin(event.e = data_SevvsNonsevThirdTrimester_Compare$ThirdTrimester_ModSev_n,n.e = data_SevvsNonsevThirdTrimester_Compare$ThirdTrimester_ModSev_N,event.c = data_SevvsNonsevThirdTrimester_Compare$ThirdTrimester_Mild_n,n.c = data_SevvsNonsevThirdTrimester_Compare$ThirdTrimester_Mild_N,studlab = authoryear,data = data_SevvsNonsevThirdTrimester_Compare,sm = "RR",comb.fixed = FALSE,label.e = "Mod Sev & Sev",label.c = "Mild")
+#   
+# pdf(file="SevvsNonsevThirdTrimester_Compare.pdf", width=10,height = 5) 
+# forest.meta(metaprop_SevvsNonsevThirdTrimester_Compare,layout =  "Revman")
+# dev.off()
+```
+
+#Read of excel - data_AP_3
+```{r}
+data_AP_3 <- read_excel("AP and Pregnancy Metaanalysis Data-Praveen Analysis.xlsx",
+     sheet = "TrimesterModSev")
+
+```
+
+#Moderate severe compare among trimester
+```{r}
+data_AP_3$authoryear<-paste(data_AP_3$author,data_AP_3$year,sep = " ")
+# View(data_AP)
+data_AP_3
+colnames(data_AP_3)
+
+data_AP_3$group<-as.factor(data_AP_3$group)
+data_AP_3$group<-factor(x = data_AP_3$group,levels = c("First Trimester","Second Trimester","Third Trimester"))
+
+data_AP_3<-data_AP_3[order(data_AP_3$year),]
+
+data_ModSev_Compare_Trimester_byVar<-data_AP_3[c("authoryear","n","N","group")]
+data_ModSev_Compare_Trimester_byVar<-data.frame(data_ModSev_Compare_Trimester_byVar)
+metaprop_ModSev_Compare_Trimester_byVar<-metaprop(event = n, n = N,data = data_ModSev_Compare_Trimester_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=authoryear,pscale = 100,byvar = group)
+
+pdf(file="ModSev_Compare_Trimester_byVar.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_ModSev_Compare_Trimester_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+
+```
+
+
+```{r}
+# data_AP_4 <- read_excel("AP and Pregnancy Metaanalysis Data-Praveen Analysis.xlsx",
+#      sheet = "TrimesterFoetalLoss")
+# 
+# data_AP_4$authoryear<-paste(data_AP_4$author,data_AP_4$year,sep = " ")
+# # View(data_AP)
+# data_AP_4
+# colnames(data_AP_4)
+# 
+# data_AP_4$group<-as.factor(data_AP_4$group)
+# data_AP_4$group<-factor(x = data_AP_4$group,levels = c("First Trimester","Second Trimester","Third Trimester"))
+# 
+# data_AP_4<-data_AP_4[order(data_AP_4$year),]
+# 
+# data_FoetalLoss_Compare_Trimester_byVar<-data_AP_4[c("authoryear","n","N","group")]
+# data_FoetalLoss_Compare_Trimester_byVar<-data.frame(data_FoetalLoss_Compare_Trimester_byVar)
+# metaprop_FoetalLoss_Compare_Trimester_byVar<-metaprop(event = n, n = N,data = data_FoetalLoss_Compare_Trimester_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=authoryear,pscale = 100,byvar = group)
+# 
+# pdf(file="FoetalLoss_Compare_Trimester_byVar.pdf", width=11,height = 12) 
+# forest.meta(
+# metaprop_FoetalLoss_Compare_Trimester_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+# dev.off()
+
+```
+
+
+#Read of excel - data_AP_5
+```{r}
+
+data_AP_5<-read_excel("AP and Pregnancy Metaanalysis Data-Praveen Analysis.xlsx",
+     sheet = "TrimesterModSev_RR")
+
+```
+
+#Moderate severe early vs late comparison 
+```{r}
+data_AP_5$authoryear<-paste(data_AP_5$author,data_AP_5$year,sep = " ")
+# View(data_AP)
+data_AP_5
+colnames(data_AP_5)
+data_AP_5<-data_AP_5[order(data_AP_5$year),]
+
+
+data_LatevsEarly_Compare <-data_AP_5[c("authoryear","Late_Trimester_n","Late_Trimester_N","Early_Trimester_n", "Early_Trimester_N")]
+
+data_LatevsEarly_Compare
+
+data_LatevsEarly_Compare<-data_LatevsEarly_Compare[!is.na(data_LatevsEarly_Compare$Late_Trimester_n)&!is.na(data_LatevsEarly_Compare$Early_Trimester_n),]
+data_LatevsEarly_Compare
+
+metaprop_LatevsEarly_Compare_ModSev<-metabin(event.e = data_LatevsEarly_Compare$Late_Trimester_n,n.e = data_LatevsEarly_Compare$Late_Trimester_N,event.c = data_LatevsEarly_Compare$Early_Trimester_n,n.c = data_LatevsEarly_Compare$Early_Trimester_N,studlab = authoryear,data = data_LatevsEarly_Compare,sm = "RR",comb.fixed = FALSE,label.e = "Late trim.",label.c = "Early trim.")
+  
+pdf(file="LatevsEarly_ModSev_Compare.pdf", width=10,height = 5) 
+forest.meta(metaprop_LatevsEarly_Compare_ModSev,layout =  "Revman")
+dev.off()
+
+```
+
+#Forest plot - Graphical abstract
+```{r}
+library(readxl)
+prevalence_forest<-read_xlsx("Lattice with all entry made_08122020.xlsx","Maternal")
+
+prevalence_forest$Parameters<-as.factor(prevalence_forest$Parameters)
+prevalence_forest$Parameters
+
+# prevalence_forest$`Hepatic Parameters` <- factor(prevalence_forest$`Hepatic Parameters`, 
+#                                                  levels=c("Bilirubin","ALT","AST","ALP","GGT","Albumin",
+#                                                  "Globulin","AHI","CLD","TLD"))
+
+prevalence_forest$Parameters<-factor(prevalence_forest$Parameters,levels = 
+                                               rev( c("Overall prevalence",
+"Maternal mortality",
+"Alcohol",
+"Hypertriglyceridemia",
+"Gallstone disease",
+"Idiopathic disease",
+"Mild",
+"Moderately severe/ severe",
+"Primigravida",
+"Multigravida",
+"Vaginal delivery",
+"Cesarean delivery",
+"First trimester",
+"Second trimester",
+"Third trimester",
+"Overall complication"
+)))
+
+prevalence_forest$Hemisphere<-as.factor(prevalence_forest$Hemisphere)
+prevalence_forest$Hemisphere<-factor(prevalence_forest$Hemisphere,levels = c("Overall","Western","Eastern"))
+
+
+# prevalence_forest$`Hepatic Parameters`<-factor(prevalence_forest$`Hepatic Parameters`,levels = rev(prevalence_forest$`Hepatic Parameters`))
+
+library(ggplot2)
+# prevalence_fp <- ggplot(data=prevalence_forest, aes(x=Hemisphere, y=center, ymin=lower, ymax=upper)) +
+#         geom_pointrange(aes(col=Hemisphere)) + 
+#         geom_hline(yintercept=25, lty=2) +  # add a dotted line at x=1 after flip
+#         coord_flip() +  # flip coordinates (puts labels on y axis)
+#         xlab("Maternal Parameters") + ylab("Prevalence (95% CI)")  + geom_errorbar(aes(ymin=lower, ymax=upper,col=Hemisphere),width=0.2,cex=1)+ 
+#     facet_wrap(~Parameters,strip.position="top",nrow=1,scales = "free_x") + theme(
+#     axis.text = element_text(size = 18),
+#     axis.title = element_text(size = 20),
+#     legend.text = element_text(size = 12),
+#     legend.title = element_text(size = 16),
+#     axis.text.x.bottom  =
+#       element_text(size = 18),
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     panel.background = element_blank(),
+#     axis.line = element_line(colour = "black"),
+#     legend.box.background = element_rect()
+#   )
+
+
+Stratification_fp = ggplot(data=prevalence_forest,
+    aes(x = Hemisphere,y=center, ymin=lower, ymax=upper ))+
+    geom_pointrange(aes(col=Hemisphere))+
+    geom_hline(aes(fill=Hemisphere),yintercept =15, linetype=2)+
+    xlab('Maternal Parameters')+ scale_y_continuous(
+    name = c("Prevalence (95% CI)"),
+    breaks = c(0,10,20,30,40,50,60,70,80,90,100),
+    limits = c(0, 100)
+  )+ geom_errorbar(aes(ymin=lower, ymax=upper,col=Hemisphere),width=0.2,cex=1)+ 
+    facet_wrap(~Parameters,strip.position="top",nrow=1,scales = "free_x") + theme(
+    axis.title = element_text(size = 18),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14),strip.text = element_text(face="bold", size=8),
+  
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    
+    axis.line = element_line(colour = "black"),
+    legend.box.background = element_rect(),axis.text.x = element_blank()
+  )
+
+
+# levels_fp = ggplot(data=prevalence_forest,
+#     aes(x = Hemisphere,y=center, ymin=lower, ymax=upper))+
+#     geom_pointrange(aes(col=Hemisphere))+
+#     geom_hline(aes(fill=Hemisphere),yintercept =1, linetype=2)+
+#     xlab('Parameters')+ geom_errorbar(aes(ymin=lower, ymax=upper,col=Hemisphere),width=0.2,cex=1)+ 
+#     facet_wrap(~Parameters,strip.position="top",nrow=1,scales = "free_x") + theme(
+#     axis.title = element_text(size = 18),
+#     axis.text = element_text(size = 14),
+#     legend.text = element_blank(),
+#     legend.title = element_blank(),
+#    legend.position = "none",
+#   
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     
+#     axis.line = element_line(colour = "black"),strip.text = element_text(face="bold", size=14),
+#     legend.box.background = element_rect(),axis.text.x = element_blank(), strip.text.x = element_text(size = 15)
+#   ) + ylab("Prevalence (95% CI")+labs(col="Hemisphere")
+
+pdf(file="Forest_prevalence.pdf", width=12,height = 6) 
+Stratification_fp
+dev.off()
+
+
+library(readxl)
+prevalence_forest_2<-read_xlsx("Lattice with all entry made_08122020.xlsx","Foetal")
+
+prevalence_forest_2$Parameters<-as.factor(prevalence_forest_2$Parameters)
+prevalence_forest_2$Parameters
+
+prevalence_forest_2$Hemisphere<-as.factor(prevalence_forest_2$Hemisphere)
+prevalence_forest_2$Hemisphere<-factor(prevalence_forest_2$Hemisphere,levels = c("Overall","Western","Eastern"))
+
+# prevalence_forest_2$`Hepatic Parameters` <- factor(prevalence_forest_2$`Hepatic Parameters`, 
+#                                                  levels=c("Bilirubin","ALT","AST","ALP","GGT","Albumin",
+#                                                  "Globulin","AHI","CLD","TLD"))
+
+prevalence_forest_2$Parameters<-factor(prevalence_forest_2$Parameters,levels = 
+                                               rev( c(
+"Neonatal mortality",
+"Term foetus",
+"Preterm foetus",
+"Foetal demise",
+"Induced abortion",
+"Total foetal loss",
+"Adverse foetal outcome"
+
+)))
+
+# prevalence_forest_2$`Hepatic Parameters`<-factor(prevalence_forest_2$`Hepatic Parameters`,levels = rev(prevalence_forest_2$`Hepatic Parameters`))
+
+# prevalence_fp_2 <- ggplot(data=prevalence_forest_2, aes(x=Hemisphere, y=center, ymin=lower, ymax=upper)) +
+#         geom_pointrange(aes(col=Hemisphere)) + 
+#         geom_hline(yintercept=25, lty=2) +  # add a dotted line at x=1 after flip
+#         coord_flip() +  # flip coordinates (puts labels on y axis)
+#         xlab("Foetal and Neonatal Parameters") + ylab("Prevalence (95% CI)")  + geom_errorbar(aes(ymin=lower, ymax=upper,col=Hemisphere),width=0.2,cex=1)+ 
+#     facet_wrap(~Parameters,strip.position="top",nrow=1,scales = "free_x")+ theme(
+#     axis.text = element_text(size = 18),
+#     axis.title = element_text(size = 20),
+#     legend.text = element_text(size = 12),
+#     legend.title = element_text(size = 16),
+#     axis.text.x.bottom  =
+#       element_text(size = 18),
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     panel.background = element_blank(),
+#     axis.line = element_line(colour = "black"),
+#     legend.box.background = element_rect()
+#   )
+
+Stratification_fp_2 = ggplot(data=prevalence_forest_2,
+    aes(x = Hemisphere,y=center, ymin=lower, ymax=upper ))+
+    geom_pointrange(aes(col=Hemisphere))+
+    geom_hline(aes(fill=Hemisphere),yintercept =15, linetype=2)+
+    xlab('Foetal Parameters')+ scale_y_continuous(
+    name = c("Prevalence (95% CI)"),
+    breaks = c(0,10,20,30,40,50,60,70,80,90,100),
+    limits = c(0, 100)
+  )+ geom_errorbar(aes(ymin=lower, ymax=upper,col=Hemisphere),width=0.2,cex=1)+ 
+    facet_wrap(~Parameters,strip.position="top",nrow=1,scales = "free_x") + theme(
+    axis.title = element_text(size = 18),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14),
+  
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    
+    axis.line = element_line(colour = "black"),
+    legend.box.background = element_rect(),axis.text.x = element_blank()
+  )
+
+
+
+pdf(file="Forest_prevalence_2.pdf",width=12,height = 6) 
+Stratification_fp_2
+dev.off()
+```
+
+#Influence analysis and Bajaut plot
+```{r}
+inf.analysis_FetalOutcome_FetalLossTotal <- InfluenceAnalysis(x = metaprop_FetalOutcome_FetalLossTotal,
+                                  random = TRUE)
+
+# capture.output(
+#   print(inf.analysis_FetalOutcome_FetalLossTotal),file = "Inf_Analysis_Baujat_Plot/inf.analysis_FetalOutcome_FetalLossTotal.txt"
+# )
+
+pdf(file="Inf_Analysis_Baujat_Plot/metaprop_FetalOutcome_FetalLossTotal_Inf_Analysis_Baujat.pdf", width=10,height = 8) 
+plot(inf.analysis_FetalOutcome_FetalLossTotal)
+dev.off()
+
+inf.analysis_FetalOutcome_FetalDeathStillBirth <- InfluenceAnalysis(x = metaprop_FetalOutcome_FetalDeathStillBirth,
+                                  random = TRUE)
+
+pdf(file="Inf_Analysis_Baujat_Plot/metaprop_FetalOutcome_FetalDeathStillBirth_Inf_Analysis_Baujat.pdf", width=10,height = 8) 
+plot(inf.analysis_FetalOutcome_FetalDeathStillBirth)
+dev.off()
+
+
+inf.analysis_FetalOutcome_Induced_Abortion <- InfluenceAnalysis(x = metaprop_FetalOutcome_Induced_Abortion,
+                                  random = TRUE)
+
+pdf(file="Inf_Analysis_Baujat_Plot/metaprop_FetalOutcome_Induced_Abortion_Inf_Analysis_Baujat.pdf", width=10,height = 8) 
+plot(inf.analysis_FetalOutcome_Induced_Abortion)
+dev.off()
+
+inf.analysis_FetalOutcome_AdverseFetalOutcome <- InfluenceAnalysis(x = metaprop_FetalOutcome_AdverseFetalOutcome,
+                                  random = TRUE)
+
+pdf(file="Inf_Analysis_Baujat_Plot/metaprop_FetalOutcome_AdverseFetalOutcome_Inf_Analysis_Baujat.pdf", width=10,height = 8) 
+plot(inf.analysis_FetalOutcome_AdverseFetalOutcome)
+dev.off()
+
+inf.analysis_Maternal_Mortality <- InfluenceAnalysis(x = metaprop_Maternal_Mortality_2,
+                                  random = TRUE)
+
+pdf(file="Inf_Analysis_Baujat_Plot/metaprop_MaternalMortality_2_Inf_Analysis_Baujat.pdf", width=10,height = 8) 
+plot(inf.analysis_Maternal_Mortality)
+dev.off()
+
+inf.analysis_Maternal_Mortality <- InfluenceAnalysis(x = metaprop_Maternal_Mortality_2,
+                                  random = TRUE)
+
+pdf(file="Inf_Analysis_Baujat_Plot/metaprop_MaternalMortality_2_Inf_Analysis_Baujat.pdf", width=10,height = 8) 
+plot(inf.analysis_Maternal_Mortality)
+dev.off()
+
+
+
+metaprop_APinTotalPregnancy
+
+
+inf.analysis_APinTotalPregnancy <- InfluenceAnalysis(x = metaprop_APinTotalPregnancy,
+                                  random = TRUE)
+
+pdf(file="Inf_Analysis_Baujat_Plot/metaprop_APinTotalPregnancy_Inf_Analysis_Baujat.pdf", width=10,height = 8) 
+plot(inf.analysis_APinTotalPregnancy)
+dev.off()
+
+
+# data_Maternal_Mortality_3 =data_Maternal_Mortality[data_Maternal_Mortality$authoryear !="Gilbert A et al 2014" & data_Maternal_Mortality$authoryear != "Gunduz E et al 2014",]
+# data_Maternal_Mortality_3<-data_Maternal_Mortality_3[order(data_Maternal_Mortality_3$year),]
+# data_Maternal_Mortality_3<-data_Maternal_Mortality_3[!is.na(data_Maternal_Mortality_3$Maternal_Mortality_n), ]
+# 
+# metaprop_Maternal_Mortality_3<-metaprop(event = data_Maternal_Mortality_3$Maternal_Mortality_n, n = data_Maternal_Mortality_3$N, data=data_Maternal_Mortality_3, comb.random=TRUE, studlab=data_Maternal_Mortality_3$authoryear,pscale = 100,comb.fixed = FALSE)
+# 
+# pdf(file="Maternal_Mortality_3.pdf", width=10,height = 8) 
+# forest.meta(metaprop_Maternal_Mortality_3,layout =   "Revman")
+# dev.off()
+# 
+# which(data_Maternal_Mortality$Maternal_Mortality_n/data_Maternal_Mortality$N>0.1)
+# 
+# data_Maternal_Mortality[8,]
+
+```
+
+#Metaregression - Maternal_Mortality
+```{r}
+data_APMetaregression <-data_AP[c("YearofPublication","Hemisphere","SampleSize","PredominantEtiology","SevereCategory")] 
+
+
+data_APMetaregression$YearofPublication<-as.factor(data_APMetaregression$YearofPublication)
+data_APMetaregression$SampleSize<-as.factor(data_APMetaregression$SampleSize)
+data_APMetaregression$Hemisphere<-as.factor(data_APMetaregression$Hemisphere)
+data_APMetaregression$PredominantEtiology<-as.factor(data_APMetaregression$PredominantEtiology)
+data_APMetaregression$SevereCategory<-as.factor(data_APMetaregression$SevereCategory)
+
+
+
+data_Maternal_Mortality_Metareg <-data_AP[c("authoryear","year","Maternal_Mortality_n","N")] 
+
+data_Maternal_Mortality_Metareg<-cbind(data_Maternal_Mortality_Metareg,data_APMetaregression)
+
+data_Maternal_Mortality_Metareg
+
+data_Maternal_Mortality_Metareg<-data_Maternal_Mortality_Metareg[order(data_Maternal_Mortality_Metareg$year),]
+data_Maternal_Mortality_Metareg<-data_Maternal_Mortality_Metareg[!is.na(data_Maternal_Mortality_Metareg$Maternal_Mortality_n), ]
+
+
+ess_Maternal_Mortality<-escalc(measure="PLO", xi=data_Maternal_Mortality_Metareg$Maternal_Mortality_n,ni=data_Maternal_Mortality_Metareg$N)
+
+meta_SampleSize_Maternal_Mortality<-rma(ess_Maternal_Mortality$yi,ess_Maternal_Mortality$vi,mods=~data_Maternal_Mortality_Metareg$SampleSize,method="ML")
+capture.output(print(meta_SampleSize_Maternal_Mortality),file = "Metaregression/metareg_SampleSize_Maternal_Mortality.txt")
+
+meta_YearofPublication_Maternal_Mortality<-rma(ess_Maternal_Mortality$yi,ess_Maternal_Mortality$vi,mods=~data_Maternal_Mortality_Metareg$YearofPublication,method="ML")
+meta_YearofPublication_Maternal_Mortality
+capture.output(print(meta_YearofPublication_Maternal_Mortality),file = "Metaregression/metareg_YearofPublication_Maternal_Mortality.txt")
+
+meta_Hemisphere_Maternal_Mortality<-rma(ess_Maternal_Mortality$yi,ess_Maternal_Mortality$vi,mods=~data_Maternal_Mortality_Metareg$Hemisphere,method="ML")
+meta_Hemisphere_Maternal_Mortality
+capture.output(print(meta_Hemisphere_Maternal_Mortality),file = "Metaregression/metareg_Hemisphere_Maternal_Mortality.txt")
+
+meta_PredominantEtiology_Maternal_Mortality<-rma(ess_Maternal_Mortality$yi,ess_Maternal_Mortality$vi,mods=~data_Maternal_Mortality_Metareg$PredominantEtiology,method="ML")
+meta_PredominantEtiology_Maternal_Mortality
+capture.output(print(meta_PredominantEtiology_Maternal_Mortality),file = "Metaregression/metareg_PredominantEtiology_Maternal_Mortality.txt")
+
+meta_SevereCategory_Maternal_Mortality<-rma(ess_Maternal_Mortality$yi,ess_Maternal_Mortality$vi,mods=~data_Maternal_Mortality_Metareg$SevereCategory,method="ML")
+meta_SevereCategory_Maternal_Mortality
+capture.output(print(meta_SevereCategory_Maternal_Mortality),file = "Metaregression/metareg_SevereCategory_Maternal_Mortality.txt")
+
+meta_Maternal_Mortality<-rma(ess_Maternal_Mortality$yi,ess_Maternal_Mortality$vi,mods=~data_Maternal_Mortality_Metareg$SampleSize+data_Maternal_Mortality_Metareg$YearofPublication+data_Maternal_Mortality_Metareg$Hemisphere+data_Maternal_Mortality_Metareg$PredominantEtiology+data_Maternal_Mortality_Metareg$SevereCategory,method="ML")
+meta_Maternal_Mortality
+capture.output(print(meta_Maternal_Mortality),file = "Metaregression/metareg_Maternal_Mortality.txt")
+
+```
+
+#Metaregression - FetalOutcome_FetalLossTotal_Metareg
+```{r}
+data_FetalOutcome_FetalLossTotal_Metareg <-data_AP[c("authoryear","year","FetalOutcome_FetalLossTotal_n","N")] 
+
+data_FetalOutcome_FetalLossTotal_Metareg<-cbind(data_FetalOutcome_FetalLossTotal_Metareg,data_APMetaregression)
+
+data_FetalOutcome_FetalLossTotal_Metareg
+
+data_FetalOutcome_FetalLossTotal_Metareg<-data_FetalOutcome_FetalLossTotal_Metareg[order(data_FetalOutcome_FetalLossTotal_Metareg$year),]
+data_FetalOutcome_FetalLossTotal_Metareg<-data_FetalOutcome_FetalLossTotal_Metareg[!is.na(data_FetalOutcome_FetalLossTotal_Metareg$FetalOutcome_FetalLossTotal_n), ]
+
+
+ess_FetalOutcome_FetalLossTotal<-escalc(measure="PLO", xi=data_FetalOutcome_FetalLossTotal_Metareg$FetalOutcome_FetalLossTotal_n,ni=data_FetalOutcome_FetalLossTotal_Metareg$N)
+
+meta_SampleSize_FetalOutcome_FetalLossTotal<-rma(ess_FetalOutcome_FetalLossTotal$yi,ess_FetalOutcome_FetalLossTotal$vi,mods=~data_FetalOutcome_FetalLossTotal_Metareg$SampleSize,method="ML")
+capture.output(print(meta_SampleSize_FetalOutcome_FetalLossTotal),file = "Metaregression/metareg_SampleSize_FetalOutcome_FetalLossTotal.txt")
+
+meta_YearofPublication_FetalOutcome_FetalLossTotal<-rma(ess_FetalOutcome_FetalLossTotal$yi,ess_FetalOutcome_FetalLossTotal$vi,mods=~data_FetalOutcome_FetalLossTotal_Metareg$YearofPublication,method="ML")
+meta_YearofPublication_FetalOutcome_FetalLossTotal
+capture.output(print(meta_YearofPublication_FetalOutcome_FetalLossTotal),file = "Metaregression/metareg_YearofPublication_FetalOutcome_FetalLossTotal.txt")
+
+meta_Hemisphere_FetalOutcome_FetalLossTotal<-rma(ess_FetalOutcome_FetalLossTotal$yi,ess_FetalOutcome_FetalLossTotal$vi,mods=~data_FetalOutcome_FetalLossTotal_Metareg$Hemisphere,method="ML")
+meta_Hemisphere_FetalOutcome_FetalLossTotal
+capture.output(print(meta_Hemisphere_FetalOutcome_FetalLossTotal),file = "Metaregression/metareg_Hemisphere_FetalOutcome_FetalLossTotal.txt")
+
+meta_PredominantEtiology_FetalOutcome_FetalLossTotal<-rma(ess_FetalOutcome_FetalLossTotal$yi,ess_FetalOutcome_FetalLossTotal$vi,mods=~data_FetalOutcome_FetalLossTotal_Metareg$PredominantEtiology,method="ML")
+meta_PredominantEtiology_FetalOutcome_FetalLossTotal
+capture.output(print(meta_PredominantEtiology_FetalOutcome_FetalLossTotal),file = "Metaregression/metareg_PredominantEtiology_FetalOutcome_FetalLossTotal.txt")
+
+meta_SevereCategory_FetalOutcome_FetalLossTotal<-rma(ess_FetalOutcome_FetalLossTotal$yi,ess_FetalOutcome_FetalLossTotal$vi,mods=~data_FetalOutcome_FetalLossTotal_Metareg$SevereCategory,method="ML")
+meta_SevereCategory_FetalOutcome_FetalLossTotal
+capture.output(print(meta_SevereCategory_FetalOutcome_FetalLossTotal),file = "Metaregression/metareg_SevereCategory_FetalOutcome_FetalLossTotal.txt")
+```
+#Metaregression - FetalOutcome_FetalDeathStillBirth
+```{r}
+
+data_FetalOutcome_FetalDeathStillBirth_Metareg <-data_AP[c("authoryear","year","FetalOutcome_FetalDeathStillBirth_n","N")] 
+
+data_FetalOutcome_FetalDeathStillBirth_Metareg<-cbind(data_FetalOutcome_FetalDeathStillBirth_Metareg,data_APMetaregression)
+
+data_FetalOutcome_FetalDeathStillBirth_Metareg
+
+data_FetalOutcome_FetalDeathStillBirth_Metareg<-data_FetalOutcome_FetalDeathStillBirth_Metareg[order(data_FetalOutcome_FetalDeathStillBirth_Metareg$year),]
+data_FetalOutcome_FetalDeathStillBirth_Metareg<-data_FetalOutcome_FetalDeathStillBirth_Metareg[!is.na(data_FetalOutcome_FetalDeathStillBirth_Metareg$FetalOutcome_FetalDeathStillBirth_n), ]
+
+
+ess_FetalOutcome_FetalDeathStillBirth<-escalc(measure="PLO", xi=data_FetalOutcome_FetalDeathStillBirth_Metareg$FetalOutcome_FetalDeathStillBirth_n,ni=data_FetalOutcome_FetalDeathStillBirth_Metareg$N)
+
+meta_SampleSize_FetalOutcome_FetalDeathStillBirth<-rma(ess_FetalOutcome_FetalDeathStillBirth$yi,ess_FetalOutcome_FetalDeathStillBirth$vi,mods=~data_FetalOutcome_FetalDeathStillBirth_Metareg$SampleSize,method="ML")
+capture.output(print(meta_SampleSize_FetalOutcome_FetalDeathStillBirth),file = "Metaregression/metareg_SampleSize_FetalOutcome_FetalDeathStillBirth.txt")
+
+meta_YearofPublication_FetalOutcome_FetalDeathStillBirth<-rma(ess_FetalOutcome_FetalDeathStillBirth$yi,ess_FetalOutcome_FetalDeathStillBirth$vi,mods=~data_FetalOutcome_FetalDeathStillBirth_Metareg$YearofPublication,method="ML")
+meta_YearofPublication_FetalOutcome_FetalDeathStillBirth
+capture.output(print(meta_YearofPublication_FetalOutcome_FetalDeathStillBirth),file = "Metaregression/metareg_YearofPublication_FetalOutcome_FetalDeathStillBirth.txt")
+
+meta_Hemisphere_FetalOutcome_FetalDeathStillBirth<-rma(ess_FetalOutcome_FetalDeathStillBirth$yi,ess_FetalOutcome_FetalDeathStillBirth$vi,mods=~data_FetalOutcome_FetalDeathStillBirth_Metareg$Hemisphere,method="ML")
+meta_Hemisphere_FetalOutcome_FetalDeathStillBirth
+capture.output(print(meta_Hemisphere_FetalOutcome_FetalDeathStillBirth),file = "Metaregression/metareg_Hemisphere_FetalOutcome_FetalDeathStillBirth.txt")
+
+meta_PredominantEtiology_FetalOutcome_FetalDeathStillBirth<-rma(ess_FetalOutcome_FetalDeathStillBirth$yi,ess_FetalOutcome_FetalDeathStillBirth$vi,mods=~data_FetalOutcome_FetalDeathStillBirth_Metareg$PredominantEtiology,method="ML")
+meta_PredominantEtiology_FetalOutcome_FetalDeathStillBirth
+capture.output(print(meta_PredominantEtiology_FetalOutcome_FetalDeathStillBirth),file = "Metaregression/metareg_PredominantEtiology_FetalOutcome_FetalDeathStillBirth.txt")
+
+meta_SevereCategory_FetalOutcome_FetalDeathStillBirth<-rma(ess_FetalOutcome_FetalDeathStillBirth$yi,ess_FetalOutcome_FetalDeathStillBirth$vi,mods=~data_FetalOutcome_FetalDeathStillBirth_Metareg$SevereCategory,method="ML")
+meta_SevereCategory_FetalOutcome_FetalDeathStillBirth
+capture.output(print(meta_SevereCategory_FetalOutcome_FetalDeathStillBirth),file = "Metaregression/metareg_SevereCategory_FetalOutcome_FetalDeathStillBirth.txt")
+
+```
+#Metaregression - FetalOutcome_Induced_Abortion
+```{r}
+
+data_FetalOutcome_Induced_Abortion_Metareg <-data_AP[c("authoryear","year","FetalOutcome_Induced_Abortion_n","N")] 
+
+data_FetalOutcome_Induced_Abortion_Metareg<-cbind(data_FetalOutcome_Induced_Abortion_Metareg,data_APMetaregression)
+
+data_FetalOutcome_Induced_Abortion_Metareg
+
+data_FetalOutcome_Induced_Abortion_Metareg<-data_FetalOutcome_Induced_Abortion_Metareg[order(data_FetalOutcome_Induced_Abortion_Metareg$year),]
+data_FetalOutcome_Induced_Abortion_Metareg<-data_FetalOutcome_Induced_Abortion_Metareg[!is.na(data_FetalOutcome_Induced_Abortion_Metareg$FetalOutcome_Induced_Abortion_n), ]
+
+
+ess_FetalOutcome_Induced_Abortion<-escalc(measure="PLO", xi=data_FetalOutcome_Induced_Abortion_Metareg$FetalOutcome_Induced_Abortion_n,ni=data_FetalOutcome_Induced_Abortion_Metareg$N)
+
+meta_SampleSize_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$SampleSize,method="ML")
+capture.output(print(meta_SampleSize_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_SampleSize_FetalOutcome_Induced_Abortion.txt")
+
+meta_YearofPublication_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$YearofPublication,method="ML")
+meta_YearofPublication_FetalOutcome_Induced_Abortion
+capture.output(print(meta_YearofPublication_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_YearofPublication_FetalOutcome_Induced_Abortion.txt")
+
+meta_Hemisphere_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$Hemisphere,method="ML")
+meta_Hemisphere_FetalOutcome_Induced_Abortion
+capture.output(print(meta_Hemisphere_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_Hemisphere_FetalOutcome_Induced_Abortion.txt")
+
+meta_PredominantEtiology_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$PredominantEtiology,method="ML")
+meta_PredominantEtiology_FetalOutcome_Induced_Abortion
+capture.output(print(meta_PredominantEtiology_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_PredominantEtiology_FetalOutcome_Induced_Abortion.txt")
+
+meta_SevereCategory_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$SevereCategory,method="ML")
+meta_SevereCategory_FetalOutcome_Induced_Abortion
+capture.output(print(meta_SevereCategory_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_SevereCategory_FetalOutcome_Induced_Abortion.txt")
+
+```
+
+
+#Metaregression - FetalOutcome_AdverseFetalOutcome
+```{r}
+
+data_FetalOutcome_AdverseFetalOutcome_Metareg <-data_AP[c("authoryear","year","FetalOutcome_AdverseFetalOutcome_n","N")] 
+
+data_FetalOutcome_AdverseFetalOutcome_Metareg<-cbind(data_FetalOutcome_AdverseFetalOutcome_Metareg,data_APMetaregression)
+
+data_FetalOutcome_AdverseFetalOutcome_Metareg
+
+data_FetalOutcome_AdverseFetalOutcome_Metareg<-data_FetalOutcome_AdverseFetalOutcome_Metareg[order(data_FetalOutcome_AdverseFetalOutcome_Metareg$year),]
+data_FetalOutcome_AdverseFetalOutcome_Metareg<-data_FetalOutcome_AdverseFetalOutcome_Metareg[!is.na(data_FetalOutcome_AdverseFetalOutcome_Metareg$FetalOutcome_AdverseFetalOutcome_n), ]
+
+
+ess_FetalOutcome_AdverseFetalOutcome<-escalc(measure="PLO", xi=data_FetalOutcome_AdverseFetalOutcome_Metareg$FetalOutcome_AdverseFetalOutcome_n,ni=data_FetalOutcome_AdverseFetalOutcome_Metareg$N)
+
+meta_SampleSize_FetalOutcome_AdverseFetalOutcome<-rma(ess_FetalOutcome_AdverseFetalOutcome$yi,ess_FetalOutcome_AdverseFetalOutcome$vi,mods=~data_FetalOutcome_AdverseFetalOutcome_Metareg$SampleSize,method="ML")
+capture.output(print(meta_SampleSize_FetalOutcome_AdverseFetalOutcome),file = "Metaregression/metareg_SampleSize_FetalOutcome_AdverseFetalOutcome.txt")
+
+meta_YearofPublication_FetalOutcome_AdverseFetalOutcome<-rma(ess_FetalOutcome_AdverseFetalOutcome$yi,ess_FetalOutcome_AdverseFetalOutcome$vi,mods=~data_FetalOutcome_AdverseFetalOutcome_Metareg$YearofPublication,method="ML")
+meta_YearofPublication_FetalOutcome_AdverseFetalOutcome
+capture.output(print(meta_YearofPublication_FetalOutcome_AdverseFetalOutcome),file = "Metaregression/metareg_YearofPublication_FetalOutcome_AdverseFetalOutcome.txt")
+
+meta_Hemisphere_FetalOutcome_AdverseFetalOutcome<-rma(ess_FetalOutcome_AdverseFetalOutcome$yi,ess_FetalOutcome_AdverseFetalOutcome$vi,mods=~data_FetalOutcome_AdverseFetalOutcome_Metareg$Hemisphere,method="ML")
+meta_Hemisphere_FetalOutcome_AdverseFetalOutcome
+capture.output(print(meta_Hemisphere_FetalOutcome_AdverseFetalOutcome),file = "Metaregression/metareg_Hemisphere_FetalOutcome_AdverseFetalOutcome.txt")
+
+meta_PredominantEtiology_FetalOutcome_AdverseFetalOutcome<-rma(ess_FetalOutcome_AdverseFetalOutcome$yi,ess_FetalOutcome_AdverseFetalOutcome$vi,mods=~data_FetalOutcome_AdverseFetalOutcome_Metareg$PredominantEtiology,method="ML")
+meta_PredominantEtiology_FetalOutcome_AdverseFetalOutcome
+capture.output(print(meta_PredominantEtiology_FetalOutcome_AdverseFetalOutcome),file = "Metaregression/metareg_PredominantEtiology_FetalOutcome_AdverseFetalOutcome.txt")
+
+meta_SevereCategory_FetalOutcome_AdverseFetalOutcome<-rma(ess_FetalOutcome_AdverseFetalOutcome$yi,ess_FetalOutcome_AdverseFetalOutcome$vi,mods=~data_FetalOutcome_AdverseFetalOutcome_Metareg$SevereCategory,method="ML")
+meta_SevereCategory_FetalOutcome_AdverseFetalOutcome
+capture.output(print(meta_SevereCategory_FetalOutcome_AdverseFetalOutcome),file = "Metaregression/metareg_SevereCategory_FetalOutcome_AdverseFetalOutcome.txt")
+
+```
+
+#Metaregression - FetalOutcome_Induced_Abortion
+```{r}
+
+data_FetalOutcome_Induced_Abortion_Metareg <-data_AP[c("authoryear","year","FetalOutcome_Induced_Abortion_n","N")] 
+
+data_FetalOutcome_Induced_Abortion_Metareg<-cbind(data_FetalOutcome_Induced_Abortion_Metareg,data_APMetaregression)
+
+data_FetalOutcome_Induced_Abortion_Metareg
+
+data_FetalOutcome_Induced_Abortion_Metareg<-data_FetalOutcome_Induced_Abortion_Metareg[order(data_FetalOutcome_Induced_Abortion_Metareg$year),]
+data_FetalOutcome_Induced_Abortion_Metareg<-data_FetalOutcome_Induced_Abortion_Metareg[!is.na(data_FetalOutcome_Induced_Abortion_Metareg$FetalOutcome_Induced_Abortion_n), ]
+
+
+ess_FetalOutcome_Induced_Abortion<-escalc(measure="PLO", xi=data_FetalOutcome_Induced_Abortion_Metareg$FetalOutcome_Induced_Abortion_n,ni=data_FetalOutcome_Induced_Abortion_Metareg$N)
+
+meta_SampleSize_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$SampleSize,method="ML")
+capture.output(print(meta_SampleSize_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_SampleSize_FetalOutcome_Induced_Abortion.txt")
+
+meta_YearofPublication_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$YearofPublication,method="ML")
+meta_YearofPublication_FetalOutcome_Induced_Abortion
+capture.output(print(meta_YearofPublication_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_YearofPublication_FetalOutcome_Induced_Abortion.txt")
+
+meta_Hemisphere_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$Hemisphere,method="ML")
+meta_Hemisphere_FetalOutcome_Induced_Abortion
+capture.output(print(meta_Hemisphere_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_Hemisphere_FetalOutcome_Induced_Abortion.txt")
+
+meta_PredominantEtiology_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$PredominantEtiology,method="ML")
+meta_PredominantEtiology_FetalOutcome_Induced_Abortion
+capture.output(print(meta_PredominantEtiology_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_PredominantEtiology_FetalOutcome_Induced_Abortion.txt")
+
+meta_SevereCategory_FetalOutcome_Induced_Abortion<-rma(ess_FetalOutcome_Induced_Abortion$yi,ess_FetalOutcome_Induced_Abortion$vi,mods=~data_FetalOutcome_Induced_Abortion_Metareg$SevereCategory,method="ML")
+meta_SevereCategory_FetalOutcome_Induced_Abortion
+capture.output(print(meta_SevereCategory_FetalOutcome_Induced_Abortion),file = "Metaregression/metareg_SevereCategory_FetalOutcome_Induced_Abortion.txt")
+
+```
+
+#Metaregression - APinTotalPregnancy
+```{r}
+
+data_APinTotalPregnancy_Metareg <-data_AP[c("authoryear","year","Acutepancreatitis_n","TotalNoPreganancy_N")] 
+
+data_APinTotalPregnancy_Metareg<-cbind(data_APinTotalPregnancy_Metareg,data_APMetaregression)
+
+data_APinTotalPregnancy_Metareg
+
+data_APinTotalPregnancy_Metareg<-data_APinTotalPregnancy_Metareg[order(data_APinTotalPregnancy_Metareg$year),]
+data_APinTotalPregnancy_Metareg<-data_APinTotalPregnancy_Metareg[!is.na(data_APinTotalPregnancy_Metareg$Acutepancreatitis_n), ]
+
+
+ess_APinTotalPregnancy<-escalc(measure="PLO",xi=data_APinTotalPregnancy_Metareg$Acutepancreatitis_n,ni=data_APinTotalPregnancy_Metareg$TotalNoPreganancy_N)
+
+meta_SampleSize_APinTotalPregnancy<-rma(ess_APinTotalPregnancy$yi,ess_APinTotalPregnancy$vi,mods=~data_APinTotalPregnancy_Metareg$SampleSize,method="ML")
+capture.output(print(meta_SampleSize_APinTotalPregnancy),file = "Metaregression/metareg_SampleSize_APinTotalPregnancy.txt")
+
+meta_YearofPublication_APinTotalPregnancy<-rma(ess_APinTotalPregnancy$yi,ess_APinTotalPregnancy$vi,mods=~data_APinTotalPregnancy_Metareg$YearofPublication,method="ML")
+meta_YearofPublication_APinTotalPregnancy
+capture.output(print(meta_YearofPublication_APinTotalPregnancy),file = "Metaregression/metareg_YearofPublication_APinTotalPregnancy.txt")
+
+meta_Hemisphere_APinTotalPregnancy<-rma(ess_APinTotalPregnancy$yi,ess_APinTotalPregnancy$vi,mods=~data_APinTotalPregnancy_Metareg$Hemisphere,method="ML")
+meta_Hemisphere_APinTotalPregnancy
+capture.output(print(meta_Hemisphere_APinTotalPregnancy),file = "Metaregression/metareg_Hemisphere_APinTotalPregnancy.txt")
+
+meta_PredominantEtiology_APinTotalPregnancy<-rma(ess_APinTotalPregnancy$yi,ess_APinTotalPregnancy$vi,mods=~data_APinTotalPregnancy_Metareg$PredominantEtiology,method="ML")
+meta_PredominantEtiology_APinTotalPregnancy
+capture.output(print(meta_PredominantEtiology_APinTotalPregnancy),file = "Metaregression/metareg_PredominantEtiology_APinTotalPregnancy.txt")
+
+meta_SevereCategory_APinTotalPregnancy<-rma(ess_APinTotalPregnancy$yi,ess_APinTotalPregnancy$vi,mods=~data_APinTotalPregnancy_Metareg$SevereCategory,method="ML")
+meta_SevereCategory_APinTotalPregnancy
+capture.output(print(meta_SevereCategory_APinTotalPregnancy),file = "Metaregression/metareg_SevereCategory_APinTotalPregnancy.txt")
+
+```
