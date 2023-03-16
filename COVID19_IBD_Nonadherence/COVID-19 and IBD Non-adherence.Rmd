@@ -1,0 +1,107 @@
+---
+title: "COVID-19 and IBD Non-adherence"
+output: html_document
+---
+
+```{r}
+library(readxl)
+data_IBDAdherence_Overall_Compare_byVar <- read_excel("D:/Dropbox/R_Files_5/COVID-19 and IBD Non-adherence/Continent COVID IBD Adherence Final.xlsx", 
+     sheet = "Non_Adherence")
+
+data_IBDAdherence_Overall_Compare_byVar <-data_IBDAdherence_Overall_Compare_byVar[order(data_IBDAdherence_Overall_Compare_byVar$Study),]
+
+data_IBDAdherence_Overall_Compare_byVar<-data_IBDAdherence_Overall_Compare_byVar[!is.na(data_IBDAdherence_Overall_Compare_byVar$EvntNA_Overall), ]
+
+colnames(data_IBDAdherence_Overall_Compare_byVar)
+
+data_IBDAdherence_Overall_Compare_byVar<-data.frame(data_IBDAdherence_Overall_Compare_byVar)
+library(meta)
+metaprop_IBDAdherence_Overall_Compare_byVar<-metaprop(event = EvntNA_Overall, n = N_Overall, data=data_IBDAdherence_Overall_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=Study,pscale = 100,method = "Inverse",byvar = Continent)
+
+pdf(file="IBDNonAdherence_Overall_Compare_byVar.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_IBDAdherence_Overall_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+data_IBDAdherence_Biologic_Compare_byVar <- read_excel("D:/Dropbox/R_Files_5/COVID-19 and IBD Non-adherence/Continent COVID IBD Adherence Final.xlsx", 
+     sheet = "Non_Adherence")
+data_IBDAdherence_Biologic_Compare_byVar <-data_IBDAdherence_Biologic_Compare_byVar[order(data_IBDAdherence_Biologic_Compare_byVar$Study),]
+
+colnames(data_IBDAdherence_Biologic_Compare_byVar)
+
+data_IBDAdherence_Biologic_Compare_byVar<-data_IBDAdherence_Biologic_Compare_byVar[!is.na(data_IBDAdherence_Biologic_Compare_byVar$EvntNA_Biologic), ]
+
+
+data_IBDAdherence_Biologic_Compare_byVar<-data.frame(data_IBDAdherence_Biologic_Compare_byVar)
+library(meta)
+metaprop_IBDAdherence_Biologic_Compare_byVar<-metaprop(event = EvntNA_Biologic, n = N_Biologic, data=data_IBDAdherence_Biologic_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=Study,pscale = 100,method = "Inverse",byvar = Continent)
+
+pdf(file="IBDNonAdherence_Biologic_Compare_byVar.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_IBDAdherence_Biologic_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+
+```
+
+
+```{r}
+library(readxl)
+
+
+metaprop_IBDAdherence_Overall<-metaprop(event = EvntNA_Overall, n = N_Overall, data=data_IBDAdherence_Overall_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=Study,pscale = 100,method = "Inverse")
+
+pdf(file="IBDNonAdherence_Overall.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_IBDAdherence_Overall,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+
+metaprop_IBDAdherence_Biologic<-metaprop(event = EvntNA_Biologic, n = N_Biologic, data=data_IBDAdherence_Biologic_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=Study,pscale = 100,method = "Inverse")
+
+pdf(file="IBDNonAdherence_Biologic.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_IBDAdherence_Biologic,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+```
+
+```{r}
+library(readxl)
+data_IBDAdherence_Overall_Compare_byVar <- read_excel("D:/Dropbox/R_Files_5/COVID-19 and IBD Non-adherence/Continent COVID IBD Adherence Final.xlsx", 
+     sheet = "Non_Adherence")
+
+data_IBDAdherence_Overall_Compare_byVar <-data_IBDAdherence_Overall_Compare_byVar[order(data_IBDAdherence_Overall_Compare_byVar$Study),]
+
+data_IBDAdherence_Overall_Compare_byVar<-data_IBDAdherence_Overall_Compare_byVar[!is.na(data_IBDAdherence_Overall_Compare_byVar$EvntNA_Overall), ]
+
+colnames(data_IBDAdherence_Overall_Compare_byVar)
+
+data_IBDAdherence_Overall_Compare_byVar<-data.frame(data_IBDAdherence_Overall_Compare_byVar)
+library(meta)
+metaprop_IBDAdherence_Overall_Compare_byVar<-metaprop(event = EvntNA_Overall, n = N_Overall, data=data_IBDAdherence_Overall_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=Study,pscale = 100,method = "GLMM",byvar = Continent)
+
+pdf(file="IBDNonAdherence_Overall_Compare_byVar_GLMM.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_IBDAdherence_Overall_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+data_IBDAdherence_Biologic_Compare_byVar <- read_excel("D:/Dropbox/R_Files_5/COVID-19 and IBD Non-adherence/Continent COVID IBD Adherence Final.xlsx", 
+     sheet = "Non_Adherence")
+data_IBDAdherence_Biologic_Compare_byVar <-data_IBDAdherence_Biologic_Compare_byVar[order(data_IBDAdherence_Biologic_Compare_byVar$Study),]
+
+colnames(data_IBDAdherence_Biologic_Compare_byVar)
+
+data_IBDAdherence_Biologic_Compare_byVar<-data_IBDAdherence_Biologic_Compare_byVar[!is.na(data_IBDAdherence_Biologic_Compare_byVar$EvntNA_Biologic), ]
+
+
+data_IBDAdherence_Biologic_Compare_byVar<-data.frame(data_IBDAdherence_Biologic_Compare_byVar)
+library(meta)
+metaprop_IBDAdherence_Biologic_Compare_byVar<-metaprop(event = EvntNA_Biologic, n = N_Biologic, data=data_IBDAdherence_Biologic_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=Study,pscale = 100,method = "GLMM",byvar = Continent)
+
+pdf(file="IBDNonAdherence_Biologic_Compare_byVar_GLMM.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_IBDAdherence_Biologic_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+```
+
