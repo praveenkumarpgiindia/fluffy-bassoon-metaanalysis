@@ -1,0 +1,217 @@
+---
+title: "COVID-19 and Dermatology"
+output: html_document
+---
+
+```{r}
+library(meta)
+library(readxl)
+```
+
+```{r}
+savename<-excel_sheets("/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx")
+
+savename
+```
+#CUTANEOUS_CATEGORY_OVERALL
+```{r}
+data_derma_CUTANEOUS_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "CUTANEOUS_CATEGORY_OVERALL")
+
+data_derma_CUTANEOUS_CATEGORY_OVERALL
+data_derma_CUTANEOUS_CATEGORY_OVERALL<-data_derma_CUTANEOUS_CATEGORY_OVERALL[order(data_derma_CUTANEOUS_CATEGORY_OVERALL$author),]
+
+metaprop_CUTANEOUS_CATEGORY_OVERALL<-metaprop(event = data_derma_CUTANEOUS_CATEGORY_OVERALL$n,n = data_derma_CUTANEOUS_CATEGORY_OVERALL$N,data = data_derma_CUTANEOUS_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_CUTANEOUS_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse")
+
+metaprop_CUTANEOUS_CATEGORY_OVERALL
+
+pdf(file = "CUTANEOUS_CATEGORY_OVERALL/CUTANEOUS_CATEGORY_OVERALL.pdf", width = 12, height = 6)
+forest.meta(metaprop_CUTANEOUS_CATEGORY_OVERALL,layout = "RevMan5")
+dev.off()
+```
+
+
+#VIRALEXAN_CATEGORY_OVERALL
+```{r}
+data_derma_VIRALEXAN_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "VIRALEXAN_CATEGORY_OVERALL")
+
+data_derma_VIRALEXAN_CATEGORY_OVERALL
+data_derma_VIRALEXAN_CATEGORY_OVERALL<-data_derma_VIRALEXAN_CATEGORY_OVERALL[order(data_derma_VIRALEXAN_CATEGORY_OVERALL$author),]
+
+metaprop_VIRALEXAN_CATEGORY_OVERALL<-metaprop(event = data_derma_VIRALEXAN_CATEGORY_OVERALL$n,n = data_derma_VIRALEXAN_CATEGORY_OVERALL$N,data = data_derma_VIRALEXAN_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_VIRALEXAN_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse")
+
+metaprop_VIRALEXAN_CATEGORY_OVERALL
+
+pdf(file = "VIRALEXAN_CATEGORY_OVERALL/VIRALEXAN_CATEGORY_OVERALL.pdf", width = 12, height = 6)
+forest.meta(metaprop_VIRALEXAN_CATEGORY_OVERALL,layout = "RevMan5")
+dev.off()
+```
+<!-- #CTD_CATEGORY_OVERALL -->
+<!-- ```{r} -->
+<!-- data_derma_CTD_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "CTD_CATEGORY_OVERALL") -->
+
+<!-- data_derma_CTD_CATEGORY_OVERALL -->
+<!-- data_derma_CTD_CATEGORY_OVERALL<-data_derma_CTD_CATEGORY_OVERALL[order(data_derma_CTD_CATEGORY_OVERALL$author),] -->
+
+<!-- metaprop_CTD_CATEGORY_OVERALL<-metaprop(event = data_derma_CTD_CATEGORY_OVERALL$n,n = data_derma_CTD_CATEGORY_OVERALL$N,data = data_derma_CTD_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_CTD_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse") -->
+
+<!-- metaprop_CTD_CATEGORY_OVERALL -->
+
+<!-- pdf(file = "CTD_CATEGORY_OVERALL/CTD_CATEGORY_OVERALL.pdf", width = 12, height = 6) -->
+<!-- forest.meta(metaprop_CTD_CATEGORY_OVERALL,layout = "RevMan5") -->
+<!-- dev.off() -->
+<!-- ``` -->
+#MPRASH_CATEGORY_OVERALL
+```{r}
+data_derma_MPRASH_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "MPRASH_CATEGORY_OVERALL")
+
+data_derma_MPRASH_CATEGORY_OVERALL
+data_derma_MPRASH_CATEGORY_OVERALL<-data_derma_MPRASH_CATEGORY_OVERALL[order(data_derma_MPRASH_CATEGORY_OVERALL$author),]
+
+metaprop_MPRASH_CATEGORY_OVERALL<-metaprop(event = data_derma_MPRASH_CATEGORY_OVERALL$n,n = data_derma_MPRASH_CATEGORY_OVERALL$N,data = data_derma_MPRASH_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_MPRASH_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse")
+
+metaprop_MPRASH_CATEGORY_OVERALL
+
+pdf(file = "MPRASH_CATEGORY_OVERALL/MPRASH_CATEGORY_OVERALL.pdf", width = 12, height = 6)
+forest.meta(metaprop_MPRASH_CATEGORY_OVERALL,layout = "RevMan5")
+dev.off()
+```
+
+<!-- #URTICARIA_CATEGORY_OVERALL -->
+<!-- ```{r} -->
+<!-- data_derma_URTICARIA_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "URTICARIA_CATEGORY_OVERALL") -->
+
+<!-- data_derma_URTICARIA_CATEGORY_OVERALL -->
+<!-- data_derma_URTICARIA_CATEGORY_OVERALL<-data_derma_URTICARIA_CATEGORY_OVERALL[order(data_derma_URTICARIA_CATEGORY_OVERALL$author),] -->
+
+<!-- metaprop_URTICARIA_CATEGORY_OVERALL<-metaprop(event = data_derma_URTICARIA_CATEGORY_OVERALL$n,n = data_derma_URTICARIA_CATEGORY_OVERALL$N,data = data_derma_URTICARIA_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_URTICARIA_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse") -->
+
+<!-- metaprop_URTICARIA_CATEGORY_OVERALL -->
+
+<!-- pdf(file = "URTICARIA_CATEGORY_OVERALL/URTICARIA_CATEGORY_OVERALL.pdf", width = 12, height = 6) -->
+<!-- forest.meta(metaprop_URTICARIA_CATEGORY_OVERALL,layout = "RevMan5") -->
+<!-- dev.off() -->
+<!-- ``` -->
+
+#VESICOBULLOUS_CATEGORY_OVERALL
+```{r}
+data_derma_VESICOBULLOUS_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "VESICOBULLOUS_CATEGORY_OVERALL")
+
+data_derma_VESICOBULLOUS_CATEGORY_OVERALL
+data_derma_VESICOBULLOUS_CATEGORY_OVERALL<-data_derma_VESICOBULLOUS_CATEGORY_OVERALL[order(data_derma_VESICOBULLOUS_CATEGORY_OVERALL$author),]
+
+metaprop_VESICOBULLOUS_CATEGORY_OVERALL<-metaprop(event = data_derma_VESICOBULLOUS_CATEGORY_OVERALL$n,n = data_derma_VESICOBULLOUS_CATEGORY_OVERALL$N,data = data_derma_VESICOBULLOUS_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_VESICOBULLOUS_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse")
+
+metaprop_VESICOBULLOUS_CATEGORY_OVERALL
+
+pdf(file = "VESICOBULLOUS_CATEGORY_OVERALL/VESICOBULLOUS_CATEGORY_OVERALL.pdf", width = 12, height = 6)
+forest.meta(metaprop_VESICOBULLOUS_CATEGORY_OVERALL,layout = "RevMan5")
+dev.off()
+```
+
+<!-- #CHILBLAIN_CATEGORY_OVERALL -->
+<!-- ```{r} -->
+<!-- data_derma_CHILBLAIN_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "CHILBLAIN_CATEGORY_OVERALL") -->
+
+<!-- data_derma_CHILBLAIN_CATEGORY_OVERALL -->
+<!-- data_derma_CHILBLAIN_CATEGORY_OVERALL<-data_derma_CHILBLAIN_CATEGORY_OVERALL[order(data_derma_CHILBLAIN_CATEGORY_OVERALL$author),] -->
+
+<!-- metaprop_CHILBLAIN_CATEGORY_OVERALL<-metaprop(event = data_derma_CHILBLAIN_CATEGORY_OVERALL$n,n = data_derma_CHILBLAIN_CATEGORY_OVERALL$N,data = data_derma_CHILBLAIN_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_CHILBLAIN_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse") -->
+
+<!-- metaprop_CHILBLAIN_CATEGORY_OVERALL -->
+
+<!-- pdf(file = "CHILBLAIN_CATEGORY_OVERALL/CHILBLAIN_CATEGORY_OVERALL.pdf", width = 12, height = 6) -->
+<!-- forest.meta(metaprop_CHILBLAIN_CATEGORY_OVERALL,layout = "RevMan5") -->
+<!-- dev.off() -->
+<!-- ``` -->
+
+<!-- #LIVEDO_CATEGORY_OVERALL -->
+<!-- ```{r} -->
+<!-- data_derma_LIVEDO_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "LIVEDO_CATEGORY_OVERALL") -->
+
+<!-- data_derma_LIVEDO_CATEGORY_OVERALL -->
+<!-- data_derma_LIVEDO_CATEGORY_OVERALL<-data_derma_LIVEDO_CATEGORY_OVERALL[order(data_derma_LIVEDO_CATEGORY_OVERALL$author),] -->
+
+<!-- metaprop_LIVEDO_CATEGORY_OVERALL<-metaprop(event = data_derma_LIVEDO_CATEGORY_OVERALL$n,n = data_derma_LIVEDO_CATEGORY_OVERALL$N,data = data_derma_LIVEDO_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_LIVEDO_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse") -->
+    
+<!-- metaprop_LIVEDO_CATEGORY_OVERALL -->
+
+<!-- pdf(file = "LIVEDO_CATEGORY_OVERALL/LIVEDO_CATEGORY_OVERALL.pdf", width = 12, height = 6) -->
+<!-- forest.meta(metaprop_LIVEDO_CATEGORY_OVERALL,layout = "RevMan5") -->
+<!-- dev.off() -->
+<!-- ``` -->
+
+#GENERALISED_CATEGORY_OVERALL
+```{r}
+data_derma_GENERALISED_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "GENERALISED_CATEGORY_OVERALL")
+
+data_derma_GENERALISED_CATEGORY_OVERALL
+data_derma_GENERALISED_CATEGORY_OVERALL<-data_derma_GENERALISED_CATEGORY_OVERALL[order(data_derma_GENERALISED_CATEGORY_OVERALL$author),]
+
+metaprop_GENERALISED_CATEGORY_OVERALL<-metaprop(event = data_derma_GENERALISED_CATEGORY_OVERALL$n,n = data_derma_GENERALISED_CATEGORY_OVERALL$N,data = data_derma_GENERALISED_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_GENERALISED_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse")
+
+metaprop_GENERALISED_CATEGORY_OVERALL
+
+pdf(file = "GENERALISED_CATEGORY_OVERALL/GENERALISED_CATEGORY_OVERALL.pdf", width = 12, height = 6)
+forest.meta(metaprop_GENERALISED_CATEGORY_OVERALL,layout = "RevMan5")
+dev.off()
+```
+
+#TRUNK_CATEGORY_OVERALL
+```{r}
+data_derma_TRUNK_CATEGORY_OVERALL<-read_xlsx(path = "/home/praveenkumarpgiindia/Dropbox/R_Files_4/COVID-19 and Dermatology/Revised data (COVID 19-skin) for analysis.xlsx",sheet = "TRUNK_CATEGORY_OVERALL")
+
+data_derma_TRUNK_CATEGORY_OVERALL
+data_derma_TRUNK_CATEGORY_OVERALL<-data_derma_TRUNK_CATEGORY_OVERALL[order(data_derma_TRUNK_CATEGORY_OVERALL$author),]
+
+metaprop_TRUNK_CATEGORY_OVERALL<-metaprop(event = data_derma_TRUNK_CATEGORY_OVERALL$n,n = data_derma_TRUNK_CATEGORY_OVERALL$N,data = data_derma_TRUNK_CATEGORY_OVERALL,comb.fixed = FALSE,comb.random = TRUE,studlab = data_derma_TRUNK_CATEGORY_OVERALL$author,pscale = 100,method = "Inverse")
+
+metaprop_TRUNK_CATEGORY_OVERALL
+
+pdf(file = "TRUNK_CATEGORY_OVERALL/TRUNK_CATEGORY_OVERALL.pdf", width = 12, height = 6)
+forest.meta(metaprop_TRUNK_CATEGORY_OVERALL,layout = "RevMan5")
+dev.off()
+```
+
+#Forest plot Mega
+```{r}
+
+# reverses the factor level ordering for labels after coord_flip()
+
+library(readxl)
+prevalence_forest<-read_xlsx("MasterForest.xlsx","Prevalence")
+
+prevalence_forest
+
+prevalence_forest$`Dermatological Parameters`<-as.factor(prevalence_forest$`Dermatological Parameters`)
+prevalence_forest$`Dermatological Parameters`
+
+
+prevalence_forest$`Dermatological Parameters`<-factor(prevalence_forest$`Dermatological Parameters`,levels = 
+                                                rev(c("Overall Cutaneous Lesions","Viral Exanthems","Maculo-papular Rashes","Vesiculo-bullous Lesions","Generalised Distribution","Truncal Distribution")))
+
+# prevalence_forest$`Dermatological Parameters`<-factor(prevalence_forest$`Dermatological Parameters`,levels = rev(prevalence_forest$`Dermatological Parameters`))
+
+library(ggplot2)
+prevalence_fp <- ggplot(data=prevalence_forest, aes(x=`Dermatological Parameters`, y=center, ymin=lower, ymax=upper)) +
+        geom_pointrange() + 
+        geom_hline(yintercept=10, lty=2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab("Dermatological Parameters") +scale_y_continuous(name = "Prevalence (95% CI)",breaks = c(0,5,10,15,20,25,30,35),limits = c(0,35))+ theme(
+    axis.text = element_text(size = 18),
+    axis.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 16),
+    axis.text.x.bottom  =
+      element_text(size = 18),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    axis.line = element_line(colour = "black"),
+    legend.box.background = element_rect()
+  )
+
+pdf(file="MegaForest/Forest_prevalence.pdf", width=12,height = 6) 
+prevalence_fp
+dev.off()
+
+```
