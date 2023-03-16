@@ -1,0 +1,787 @@
+---
+title: "COVID-19 and IBD"
+output: html_document
+---
+
+```{r}
+library(meta)
+library(readxl)
+
+```
+
+
+```{r}
+
+data_IBDvsTotPop_Compare <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "IncidenceCOVID_IBDvsTotalPopula")
+data_IBDvsTotPop_Compare
+
+data_IBDvsTotPop_Compare <-data_IBDvsTotPop_Compare[order(data_IBDvsTotPop_Compare$author),]
+
+data_IBDvsTotPop_Compare_byVar_IBD<-data_IBDvsTotPop_Compare[,c("author","IBD_n","IBD_N")]
+data_IBDvsTotPop_Compare_byVar_IBD<-data_IBDvsTotPop_Compare_byVar_IBD[!is.na(data_IBDvsTotPop_Compare_byVar_IBD$IBD_n), ]
+data_IBDvsTotPop_Compare_byVar_IBD$group<-"IBD"
+colnames(data_IBDvsTotPop_Compare_byVar_IBD)
+colnames(data_IBDvsTotPop_Compare_byVar_IBD)<-c("author","n", "N", "group")
+
+data_IBDvsTotPop_Compare_byVar_GenPopulation<-data_IBDvsTotPop_Compare[,c("author","TotalPopulation_n","TotalPopulation_N")]
+data_IBDvsTotPop_Compare_byVar_GenPopulation<-data_IBDvsTotPop_Compare_byVar_GenPopulation[!is.na(data_IBDvsTotPop_Compare_byVar_GenPopulation$TotalPopulation_n), ]
+data_IBDvsTotPop_Compare_byVar_GenPopulation$group<-"Gen. Population"
+colnames(data_IBDvsTotPop_Compare_byVar_GenPopulation)
+colnames(data_IBDvsTotPop_Compare_byVar_GenPopulation)<-c("author","n", "N", "group")
+
+data_IBDvsTotPop_Compare_byVar<-rbind(data_IBDvsTotPop_Compare_byVar_IBD,data_IBDvsTotPop_Compare_byVar_GenPopulation)
+
+data_IBDvsTotPop_Compare_byVar<-data.frame(data_IBDvsTotPop_Compare_byVar)
+metaprop_IBDvsTotPop_Compare_byVar<-metaprop(event = n, n = N, data=data_IBDvsTotPop_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 1000,method = "Inverse",byvar = group)
+
+pdf(file="IBD/IBDvsTotPop_Compare_byVariable.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_IBDvsTotPop_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+data_IBDvsTotPop_Compare <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "IncidenceCOVID_IBDvsTotalPopula")
+
+data_IBDvsTotPop_Compare <-data_IBDvsTotPop_Compare[order(data_IBDvsTotPop_Compare$author),]
+
+data_IBDvsTotPop_Compare
+
+data_IBDvsTotPop_Compare<-data_IBDvsTotPop_Compare[!is.na(data_IBDvsTotPop_Compare$IBD_n)&!is.na(data_IBDvsTotPop_Compare$TotalPopulation_n),]
+data_IBDvsTotPop_Compare
+
+
+metaprop_IBDvsTotPop_Compare<-metabin(event.e = data_IBDvsTotPop_Compare$IBD_n,n.e = data_IBDvsTotPop_Compare$IBD_N,event.c = data_IBDvsTotPop_Compare$TotalPopulation_n,n.c = data_IBDvsTotPop_Compare$TotalPopulation_N,studlab = author,data = data_IBDvsTotPop_Compare,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "IBD",label.c = "Gen. Population",label.left = "Favours IBD",label.right = "Favours Gen.\n Population")
+  
+pdf(file="IBD/IBDvsTotPop_Compare.pdf", width=10,height = 5) 
+forest.meta(metaprop_IBDvsTotPop_Compare,layout =  "Revman")
+dev.off()
+
+
+
+
+
+data_IBDvsTotPop_Compare_Age <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "IncidenceCOVID_IBDvsTotalPopula")
+data_IBDvsTotPop_Compare_Age
+
+data_IBDvsTotPop_Compare_Age <-data_IBDvsTotPop_Compare_Age[order(data_IBDvsTotPop_Compare_Age$author),]
+data_IBDvsTotPop_Compare_Age
+
+data_IBDvsTotPop_Compare_Age<-data_IBDvsTotPop_Compare_Age[,c("author","IBD_n","IBD_N","Age")]
+data_IBDvsTotPop_Compare_Age<-data_IBDvsTotPop_Compare_Age[!is.na(data_IBDvsTotPop_Compare_Age$Age), ]
+
+
+data_IBDvsTotPop_Compare_Age<-data.frame(data_IBDvsTotPop_Compare_Age)
+metaprop_IBDvsTotPop_Compare_Age_byVar<-metaprop(event = IBD_n, n = IBD_N, data=data_IBDvsTotPop_Compare_Age, comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 1000,method = "Inverse",byvar = Age)
+
+pdf(file="IBD/IBDvsTotPop_Compare_Age_byVariable.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_IBDvsTotPop_Compare_Age_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+
+metaprop_IBDvsTotPop_Compare_byVar_IBD_Bajaut<-metaprop(event = n, n = N, data=data_IBDvsTotPop_Compare_byVar[data_IBDvsTotPop_Compare_byVar$group=="IBD",], comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 1000,method = "Inverse")
+metaprop_IBDvsTotPop_Compare_byVar_GenPopulation_Bajaut<-metaprop(event = n, n = N, data=data_IBDvsTotPop_Compare_byVar[data_IBDvsTotPop_Compare_byVar$group=="Gen. Population",], comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 1000,method = "Inverse")
+
+
+pdf(file="IBDvsTotPop_Incidence_IBD_Baujat.pdf", width=10,height = 8) 
+baujat.meta(metaprop_IBDvsTotPop_Compare_byVar_IBD_Bajaut)
+dev.off()
+
+pdf(file="IBDvsTotPop_Incidence_GenPopulation_Baujat.pdf", width=10,height = 8) 
+baujat.meta(metaprop_IBDvsTotPop_Compare_byVar_GenPopulation_Bajaut)
+dev.off()
+
+library(dmetar)
+
+
+inf.analysis_IBDvsTotPop_Compare_byVar_IBD <- InfluenceAnalysis(x = metaprop_IBDvsTotPop_Compare_byVar_IBD_Bajaut,random = TRUE)
+inf.analysis_IBDvsTotPop_Compare_byVar_GenPopulation <- InfluenceAnalysis(x = metaprop_IBDvsTotPop_Compare_byVar_GenPopulation_Bajaut,random=TRUE)
+
+pdf(file="Leave out one analysis IBDvsTotPop_Compare_byVar_IBD.pdf", width=10,height = 8) 
+plot(inf.analysis_IBDvsTotPop_Compare_byVar_IBD, "i2")
+dev.off()
+pdf(file="Leave out one analysis IBDvsTotPop_Compare_byVar_GenPopulation.pdf", width=10,height = 8) 
+plot(inf.analysis_IBDvsTotPop_Compare_byVar_GenPopulation, "i2")
+dev.off()
+```
+
+
+```{r}
+
+data_OutcomeIBDCV_Mortality <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Outcome_IBDwithCOVID")
+
+data_OutcomeIBDCV_Mortality<-data_OutcomeIBDCV_Mortality[order(data_OutcomeIBDCV_Mortality$author),]
+data_OutcomeIBDCV_Mortality<-data_OutcomeIBDCV_Mortality[!is.na(data_OutcomeIBDCV_Mortality$Mortality_n), ]
+data_OutcomeIBDCV_Mortality
+
+metaprop_OutcomeIBDCV_Mortality<-metaprop(event = data_OutcomeIBDCV_Mortality$Mortality_n, n = data_OutcomeIBDCV_Mortality$N, data=data_OutcomeIBDCV_Mortality, comb.random=TRUE, studlab=data_OutcomeIBDCV_Mortality$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+
+pdf(file="IBD/OutcomeIBDCV_Mortality.pdf", width=10,height = 6) 
+forest.meta(metaprop_OutcomeIBDCV_Mortality,layout =   "Revman")
+dev.off()
+
+data_OutcomeIBDCV_Hospitalization <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Outcome_IBDwithCOVID")
+
+data_OutcomeIBDCV_Hospitalization<-data_OutcomeIBDCV_Hospitalization[order(data_OutcomeIBDCV_Hospitalization$author),]
+data_OutcomeIBDCV_Hospitalization<-data_OutcomeIBDCV_Hospitalization[!is.na(data_OutcomeIBDCV_Hospitalization$Hospitalization_n), ]
+data_OutcomeIBDCV_Hospitalization
+
+metaprop_OutcomeIBDCV_Hospitalization<-metaprop(event = data_OutcomeIBDCV_Hospitalization$Hospitalization_n, n = data_OutcomeIBDCV_Hospitalization$N, data=data_OutcomeIBDCV_Hospitalization, comb.random=TRUE, studlab=data_OutcomeIBDCV_Hospitalization$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+
+pdf(file="IBD/OutcomeIBDCV_Hospitalization.pdf", width=10,height = 6) 
+forest.meta(metaprop_OutcomeIBDCV_Hospitalization,layout =   "Revman")
+dev.off()
+
+data_OutcomeIBDCV_ICU <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Outcome_IBDwithCOVID")
+
+data_OutcomeIBDCV_ICU<-data_OutcomeIBDCV_ICU[order(data_OutcomeIBDCV_ICU$author),]
+data_OutcomeIBDCV_ICU<-data_OutcomeIBDCV_ICU[!is.na(data_OutcomeIBDCV_ICU$ICU_n), ]
+data_OutcomeIBDCV_ICU
+
+metaprop_OutcomeIBDCV_ICU<-metaprop(event = data_OutcomeIBDCV_ICU$ICU_n, n = data_OutcomeIBDCV_ICU$N, data=data_OutcomeIBDCV_ICU, comb.random=TRUE, studlab=data_OutcomeIBDCV_ICU$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+
+pdf(file="IBD/OutcomeIBDCV_ICU.pdf", width=10,height = 6) 
+forest.meta(metaprop_OutcomeIBDCV_ICU,layout =   "Revman")
+dev.off()
+
+
+
+pdf(file="OutcomeIBDCV_Mortality_Baujat.pdf", width=10,height = 8) 
+baujat.meta(metaprop_OutcomeIBDCV_Mortality)
+dev.off()
+
+pdf(file="OutcomeIBDCV_Hospitalization_Baujat.pdf", width=10,height = 8) 
+baujat.meta(metaprop_OutcomeIBDCV_Hospitalization)
+dev.off()
+
+
+
+inf.analysis_OutcomeIBDCV_Mortality<- InfluenceAnalysis(x = metaprop_OutcomeIBDCV_Mortality,random = TRUE)
+
+pdf(file="Leave out one analysis OutcomeIBDCV_Mortality .pdf", width=10,height = 8) 
+plot(inf.analysis_OutcomeIBDCV_Mortality, "i2")
+dev.off()
+
+
+inf.analysis_OutcomeIBDCV_Hospitalization<- InfluenceAnalysis(x = metaprop_OutcomeIBDCV_Hospitalization,random = TRUE)
+
+pdf(file="Leave out one analysis OutcomeIBDCV_Hospitalization .pdf", width=10,height = 8) 
+plot(inf.analysis_OutcomeIBDCV_Hospitalization, "i2")
+dev.off()
+```
+
+
+# ```{r}
+# data_SymptomsIBDCV_Diarrhea <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Diarrhea<-data_SymptomsIBDCV_Diarrhea[order(data_SymptomsIBDCV_Diarrhea$author),]
+# data_SymptomsIBDCV_Diarrhea<-data_SymptomsIBDCV_Diarrhea[!is.na(data_SymptomsIBDCV_Diarrhea$Diarrhea_n), ]
+# data_SymptomsIBDCV_Diarrhea
+# 
+# metaprop_SymptomsIBDCV_Diarrhea<-metaprop(event = data_SymptomsIBDCV_Diarrhea$Diarrhea_n, n = data_SymptomsIBDCV_Diarrhea$N, data=data_SymptomsIBDCV_Diarrhea, comb.random=TRUE, studlab=data_SymptomsIBDCV_Diarrhea$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Diarrhea.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Diarrhea,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_Vomitings <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Vomitings<-data_SymptomsIBDCV_Vomitings[order(data_SymptomsIBDCV_Vomitings$author),]
+# data_SymptomsIBDCV_Vomitings<-data_SymptomsIBDCV_Vomitings[!is.na(data_SymptomsIBDCV_Vomitings$Vomitings_n), ]
+# data_SymptomsIBDCV_Vomitings
+# 
+# metaprop_SymptomsIBDCV_Vomitings<-metaprop(event = data_SymptomsIBDCV_Vomitings$Vomitings_n, n = data_SymptomsIBDCV_Vomitings$N, data=data_SymptomsIBDCV_Vomitings, comb.random=TRUE, studlab=data_SymptomsIBDCV_Vomitings$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Vomitings.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Vomitings,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_AbdominalPain <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_AbdominalPain<-data_SymptomsIBDCV_AbdominalPain[order(data_SymptomsIBDCV_AbdominalPain$author),]
+# data_SymptomsIBDCV_AbdominalPain<-data_SymptomsIBDCV_AbdominalPain[!is.na(data_SymptomsIBDCV_AbdominalPain$AbdominalPain_n), ]
+# data_SymptomsIBDCV_AbdominalPain
+# 
+# metaprop_SymptomsIBDCV_AbdominalPain<-metaprop(event = data_SymptomsIBDCV_AbdominalPain$AbdominalPain_n, n = data_SymptomsIBDCV_AbdominalPain$N, data=data_SymptomsIBDCV_AbdominalPain, comb.random=TRUE, studlab=data_SymptomsIBDCV_AbdominalPain$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_AbdominalPain.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_AbdominalPain,layout =   "Revman")
+# dev.off()
+# 
+# data_SymptomsIBDCV_Fever <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Fever<-data_SymptomsIBDCV_Fever[order(data_SymptomsIBDCV_Fever$author),]
+# data_SymptomsIBDCV_Fever<-data_SymptomsIBDCV_Fever[!is.na(data_SymptomsIBDCV_Fever$Fever_n), ]
+# data_SymptomsIBDCV_Fever
+# 
+# metaprop_SymptomsIBDCV_Fever<-metaprop(event = data_SymptomsIBDCV_Fever$Fever_n, n = data_SymptomsIBDCV_Fever$N, data=data_SymptomsIBDCV_Fever, comb.random=TRUE, studlab=data_SymptomsIBDCV_Fever$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Fever.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Fever,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_Cough <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Cough<-data_SymptomsIBDCV_Cough[order(data_SymptomsIBDCV_Cough$author),]
+# data_SymptomsIBDCV_Cough<-data_SymptomsIBDCV_Cough[!is.na(data_SymptomsIBDCV_Cough$Cough_n), ]
+# data_SymptomsIBDCV_Cough
+# 
+# metaprop_SymptomsIBDCV_Cough<-metaprop(event = data_SymptomsIBDCV_Cough$Cough_n, n = data_SymptomsIBDCV_Cough$N, data=data_SymptomsIBDCV_Cough, comb.random=TRUE, studlab=data_SymptomsIBDCV_Cough$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Cough.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Cough,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_SoreThroat <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_SoreThroat<-data_SymptomsIBDCV_SoreThroat[order(data_SymptomsIBDCV_SoreThroat$author),]
+# data_SymptomsIBDCV_SoreThroat<-data_SymptomsIBDCV_SoreThroat[!is.na(data_SymptomsIBDCV_SoreThroat$SoreThroat_n), ]
+# data_SymptomsIBDCV_SoreThroat
+# 
+# metaprop_SymptomsIBDCV_SoreThroat<-metaprop(event = data_SymptomsIBDCV_SoreThroat$SoreThroat_n, n = data_SymptomsIBDCV_SoreThroat$N, data=data_SymptomsIBDCV_SoreThroat, comb.random=TRUE, studlab=data_SymptomsIBDCV_SoreThroat$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_SoreThroat.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_SoreThroat,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_Dyspnea <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Dyspnea<-data_SymptomsIBDCV_Dyspnea[order(data_SymptomsIBDCV_Dyspnea$author),]
+# data_SymptomsIBDCV_Dyspnea<-data_SymptomsIBDCV_Dyspnea[!is.na(data_SymptomsIBDCV_Dyspnea$Dyspnea_n), ]
+# data_SymptomsIBDCV_Dyspnea
+# 
+# metaprop_SymptomsIBDCV_Dyspnea<-metaprop(event = data_SymptomsIBDCV_Dyspnea$Dyspnea_n, n = data_SymptomsIBDCV_Dyspnea$N, data=data_SymptomsIBDCV_Dyspnea, comb.random=TRUE, studlab=data_SymptomsIBDCV_Dyspnea$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Dyspnea.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Dyspnea,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_Ageusia <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Ageusia<-data_SymptomsIBDCV_Ageusia[order(data_SymptomsIBDCV_Ageusia$author),]
+# data_SymptomsIBDCV_Ageusia<-data_SymptomsIBDCV_Ageusia[!is.na(data_SymptomsIBDCV_Ageusia$Ageusia_n), ]
+# data_SymptomsIBDCV_Ageusia
+# 
+# metaprop_SymptomsIBDCV_Ageusia<-metaprop(event = data_SymptomsIBDCV_Ageusia$Ageusia_n, n = data_SymptomsIBDCV_Ageusia$N, data=data_SymptomsIBDCV_Ageusia, comb.random=TRUE, studlab=data_SymptomsIBDCV_Ageusia$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Ageusia.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Ageusia,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_Anosmia <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Anosmia<-data_SymptomsIBDCV_Anosmia[order(data_SymptomsIBDCV_Anosmia$author),]
+# data_SymptomsIBDCV_Anosmia<-data_SymptomsIBDCV_Anosmia[!is.na(data_SymptomsIBDCV_Anosmia$Anosmia_n), ]
+# data_SymptomsIBDCV_Anosmia
+# 
+# metaprop_SymptomsIBDCV_Anosmia<-metaprop(event = data_SymptomsIBDCV_Anosmia$Anosmia_n, n = data_SymptomsIBDCV_Anosmia$N, data=data_SymptomsIBDCV_Anosmia, comb.random=TRUE, studlab=data_SymptomsIBDCV_Anosmia$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Anosmia.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Anosmia,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_Fatigue <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Fatigue<-data_SymptomsIBDCV_Fatigue[order(data_SymptomsIBDCV_Fatigue$author),]
+# data_SymptomsIBDCV_Fatigue<-data_SymptomsIBDCV_Fatigue[!is.na(data_SymptomsIBDCV_Fatigue$Fatigue_n), ]
+# data_SymptomsIBDCV_Fatigue
+# 
+# metaprop_SymptomsIBDCV_Fatigue<-metaprop(event = data_SymptomsIBDCV_Fatigue$Fatigue_n, n = data_SymptomsIBDCV_Fatigue$N, data=data_SymptomsIBDCV_Fatigue, comb.random=TRUE, studlab=data_SymptomsIBDCV_Fatigue$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Fatigue.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Fatigue,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_Myalgia <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_Myalgia<-data_SymptomsIBDCV_Myalgia[order(data_SymptomsIBDCV_Myalgia$author),]
+# data_SymptomsIBDCV_Myalgia<-data_SymptomsIBDCV_Myalgia[!is.na(data_SymptomsIBDCV_Myalgia$Myalgia_n), ]
+# data_SymptomsIBDCV_Myalgia
+# 
+# metaprop_SymptomsIBDCV_Myalgia<-metaprop(event = data_SymptomsIBDCV_Myalgia$Myalgia_n, n = data_SymptomsIBDCV_Myalgia$N, data=data_SymptomsIBDCV_Myalgia, comb.random=TRUE, studlab=data_SymptomsIBDCV_Myalgia$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_Myalgia.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_Myalgia,layout =   "Revman")
+# dev.off()
+# 
+# 
+# data_SymptomsIBDCV_RunningNose <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Symptoms_IBDwithCOVID")
+# 
+# data_SymptomsIBDCV_RunningNose<-data_SymptomsIBDCV_RunningNose[order(data_SymptomsIBDCV_RunningNose$author),]
+# data_SymptomsIBDCV_RunningNose<-data_SymptomsIBDCV_RunningNose[!is.na(data_SymptomsIBDCV_RunningNose$RunningNose_n), ]
+# data_SymptomsIBDCV_RunningNose
+# 
+# metaprop_SymptomsIBDCV_RunningNose<-metaprop(event = data_SymptomsIBDCV_RunningNose$RunningNose_n, n = data_SymptomsIBDCV_RunningNose$N, data=data_SymptomsIBDCV_RunningNose, comb.random=TRUE, studlab=data_SymptomsIBDCV_RunningNose$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+# 
+# pdf(file="IBD/SymptomsIBDCV_RunningNose.pdf", width=10,height = 6) 
+# forest.meta(metaprop_SymptomsIBDCV_RunningNose,layout =   "Revman")
+# dev.off()
+# ```
+
+
+
+```{r}
+
+data_COVIDPosCOVIDNeg_ASA <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDPosCOVIDNeg_Drugs")
+
+data_COVIDPosCOVIDNeg_ASA <-data_COVIDPosCOVIDNeg_ASA[order(data_COVIDPosCOVIDNeg_ASA$author),]
+
+data_COVIDPosCOVIDNeg_ASA
+
+data_COVIDPosCOVIDNeg_ASA<-data_COVIDPosCOVIDNeg_ASA[!is.na(data_COVIDPosCOVIDNeg_ASA$COVIDPos_ASA_n)&!is.na(data_COVIDPosCOVIDNeg_ASA$COVIDNeg_ASA_n),]
+data_COVIDPosCOVIDNeg_ASA
+
+metaprop_COVIDPosCOVIDNeg_ASA<-metabin(event.e = COVIDPos_ASA_n,n.e = COVIDPos_N,event.c = COVIDNeg_ASA_n,n.c = COVIDNeg_N,studlab = author,data = data_COVIDPosCOVIDNeg_ASA,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "COVID Pos",label.c = "COVID Neg",label.left = "Favours ASA",label.right = "Favours no ASA")
+  
+pdf(file="IBD/COVIDPosCOVIDNeg_ASA.pdf", width=10,height = 5) 
+forest.meta(metaprop_COVIDPosCOVIDNeg_ASA,layout =  "Revman")
+dev.off()
+
+
+data_COVIDPosCOVIDNeg_Steroid <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDPosCOVIDNeg_Drugs")
+
+data_COVIDPosCOVIDNeg_Steroid <-data_COVIDPosCOVIDNeg_Steroid[order(data_COVIDPosCOVIDNeg_Steroid$author),]
+
+data_COVIDPosCOVIDNeg_Steroid
+
+data_COVIDPosCOVIDNeg_Steroid<-data_COVIDPosCOVIDNeg_Steroid[!is.na(data_COVIDPosCOVIDNeg_Steroid$COVIDPos_Steroid_n)&!is.na(data_COVIDPosCOVIDNeg_Steroid$COVIDNeg_Steroid_n),]
+data_COVIDPosCOVIDNeg_Steroid
+
+metaprop_COVIDPosCOVIDNeg_Steroid<-metabin(event.e = COVIDPos_Steroid_n,n.e = COVIDPos_N,event.c = COVIDNeg_Steroid_n,n.c = COVIDNeg_N,studlab = author,data = data_COVIDPosCOVIDNeg_Steroid,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "COVID Pos",label.c = "COVID Neg",label.left = "Favours \nSteroid",label.right = "Favours no \nSteroid")
+  
+pdf(file="IBD/COVIDPosCOVIDNeg_Steroid.pdf", width=10,height = 5) 
+forest.meta(metaprop_COVIDPosCOVIDNeg_Steroid,layout =  "Revman")
+dev.off()
+
+data_COVIDPosCOVIDNeg_Immunomodulator <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDPosCOVIDNeg_Drugs")
+
+data_COVIDPosCOVIDNeg_Immunomodulator <-data_COVIDPosCOVIDNeg_Immunomodulator[order(data_COVIDPosCOVIDNeg_Immunomodulator$author),]
+
+data_COVIDPosCOVIDNeg_Immunomodulator
+
+data_COVIDPosCOVIDNeg_Immunomodulator<-data_COVIDPosCOVIDNeg_Immunomodulator[!is.na(data_COVIDPosCOVIDNeg_Immunomodulator$COVIDPos_Immunomodulator_n)&!is.na(data_COVIDPosCOVIDNeg_Immunomodulator$COVIDNeg_Immunomodulator_n),]
+data_COVIDPosCOVIDNeg_Immunomodulator
+
+metaprop_COVIDPosCOVIDNeg_Immunomodulator<-metabin(event.e = COVIDPos_Immunomodulator_n,n.e = COVIDPos_N,event.c = COVIDNeg_Immunomodulator_n,n.c = COVIDNeg_N,studlab = author,data = data_COVIDPosCOVIDNeg_Immunomodulator,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "COVID Pos",label.c = "COVID Neg",label.left = "Favours \nImmunomodulator",label.right = "Favours no \nImmunomodulator")
+  
+pdf(file="IBD/COVIDPosCOVIDNeg_Immunomodulator.pdf", width=10,height = 5) 
+forest.meta(metaprop_COVIDPosCOVIDNeg_Immunomodulator,layout =  "Revman")
+dev.off()
+
+
+data_COVIDPosCOVIDNeg_AntiTNF <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDPosCOVIDNeg_Drugs")
+
+data_COVIDPosCOVIDNeg_AntiTNF <-data_COVIDPosCOVIDNeg_AntiTNF[order(data_COVIDPosCOVIDNeg_AntiTNF$author),]
+
+data_COVIDPosCOVIDNeg_AntiTNF
+
+data_COVIDPosCOVIDNeg_AntiTNF<-data_COVIDPosCOVIDNeg_AntiTNF[!is.na(data_COVIDPosCOVIDNeg_AntiTNF$COVIDPos_AntiTNF_n)&!is.na(data_COVIDPosCOVIDNeg_AntiTNF$COVIDNeg_AntiTNF_n),]
+data_COVIDPosCOVIDNeg_AntiTNF
+
+metaprop_COVIDPosCOVIDNeg_AntiTNF<-metabin(event.e = COVIDPos_AntiTNF_n,n.e = COVIDPos_N,event.c = COVIDNeg_AntiTNF_n,n.c = COVIDNeg_N,studlab = author,data = data_COVIDPosCOVIDNeg_AntiTNF,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "COVID Pos",label.c = "COVID Neg",label.left = "Favours \nAnti-TNF",label.right = "Favours no \nAnti-TNF")
+  
+pdf(file="IBD/COVIDPosCOVIDNeg_AntiTNF.pdf", width=10,height = 5) 
+forest.meta(metaprop_COVIDPosCOVIDNeg_AntiTNF,layout =  "Revman")
+dev.off()
+
+data_COVIDPosCOVIDNeg_Vedolizumab <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDPosCOVIDNeg_Drugs")
+
+data_COVIDPosCOVIDNeg_Vedolizumab <-data_COVIDPosCOVIDNeg_Vedolizumab[order(data_COVIDPosCOVIDNeg_Vedolizumab$author),]
+
+data_COVIDPosCOVIDNeg_Vedolizumab
+
+data_COVIDPosCOVIDNeg_Vedolizumab<-data_COVIDPosCOVIDNeg_Vedolizumab[!is.na(data_COVIDPosCOVIDNeg_Vedolizumab$COVIDPos_Vedolizumab_n)&!is.na(data_COVIDPosCOVIDNeg_Vedolizumab$COVIDNeg_Vedolizumab_n),]
+data_COVIDPosCOVIDNeg_Vedolizumab
+
+metaprop_COVIDPosCOVIDNeg_Vedolizumab<-metabin(event.e = COVIDPos_Vedolizumab_n,n.e = COVIDPos_N,event.c = COVIDNeg_Vedolizumab_n,n.c = COVIDNeg_N,studlab = author,data = data_COVIDPosCOVIDNeg_Vedolizumab,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "COVID Pos",label.c = "COVID Neg",label.left = "Favours \nVedolizumab",label.right = "Favours no \nVedolizumab")
+  
+pdf(file="IBD/COVIDPosCOVIDNeg_Vedolizumab.pdf", width=10,height = 5) 
+forest.meta(metaprop_COVIDPosCOVIDNeg_Vedolizumab,layout =  "Revman")
+dev.off()
+
+data_COVIDPosCOVIDNeg_Ustekinumab <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDPosCOVIDNeg_Drugs")
+
+data_COVIDPosCOVIDNeg_Ustekinumab <-data_COVIDPosCOVIDNeg_Ustekinumab[order(data_COVIDPosCOVIDNeg_Ustekinumab$author),]
+
+data_COVIDPosCOVIDNeg_Ustekinumab
+
+data_COVIDPosCOVIDNeg_Ustekinumab<-data_COVIDPosCOVIDNeg_Ustekinumab[!is.na(data_COVIDPosCOVIDNeg_Ustekinumab$COVIDPos_Ustekinumab_n)&!is.na(data_COVIDPosCOVIDNeg_Ustekinumab$COVIDNeg_Ustekinumab_n),]
+data_COVIDPosCOVIDNeg_Ustekinumab
+
+metaprop_COVIDPosCOVIDNeg_Ustekinumab<-metabin(event.e = COVIDPos_Ustekinumab_n,n.e = COVIDPos_N,event.c = COVIDNeg_Ustekinumab_n,n.c = COVIDNeg_N,studlab = author,data = data_COVIDPosCOVIDNeg_Ustekinumab,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "COVID Pos",label.c = "COVID Neg",label.left = "Favours \nUstekinumab",label.right = "Favours no \nUstekinumab")
+  
+pdf(file="IBD/COVIDPosCOVIDNeg_Ustekinumab.pdf", width=10,height = 5) 
+forest.meta(metaprop_COVIDPosCOVIDNeg_Ustekinumab,layout =  "Revman")
+dev.off()
+
+data_COVIDPosCOVIDNeg_Biologicals <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDPosCOVIDNeg_Drugs")
+
+data_COVIDPosCOVIDNeg_Biologicals <-data_COVIDPosCOVIDNeg_Biologicals[order(data_COVIDPosCOVIDNeg_Biologicals$author),]
+
+data_COVIDPosCOVIDNeg_Biologicals
+
+data_COVIDPosCOVIDNeg_Biologicals<-data_COVIDPosCOVIDNeg_Biologicals[!is.na(data_COVIDPosCOVIDNeg_Biologicals$COVIDPos_Biologicals_n)&!is.na(data_COVIDPosCOVIDNeg_Biologicals$COVIDNeg_Biologicals_n),]
+data_COVIDPosCOVIDNeg_Biologicals
+
+metaprop_COVIDPosCOVIDNeg_Biologicals<-metabin(event.e = COVIDPos_Biologicals_n,n.e = COVIDPos_N,event.c = COVIDNeg_Biologicals_n,n.c = COVIDNeg_N,studlab = author,data = data_COVIDPosCOVIDNeg_Biologicals,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "COVID Pos",label.c = "COVID Neg",label.left = "Favours \nBiological",label.right = "Favours no \nBiological")
+  
+pdf(file="IBD/COVIDPosCOVIDNeg_Biologicals.pdf", width=10,height = 5) 
+forest.meta(metaprop_COVIDPosCOVIDNeg_Biologicals,layout =  "Revman")
+dev.off()
+
+```
+
+```{r}
+data_NonadherenceIBD_AnyTreatment <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Nonadherence_IBD")
+
+data_NonadherenceIBD_AnyTreatment<-data_NonadherenceIBD_AnyTreatment[order(data_NonadherenceIBD_AnyTreatment$author),]
+data_NonadherenceIBD_AnyTreatment<-data_NonadherenceIBD_AnyTreatment[!is.na(data_NonadherenceIBD_AnyTreatment$Nonadherence_Anytreatment_n), ]
+data_NonadherenceIBD_AnyTreatment
+
+metaprop_NonadherenceIBD_AnyTreatment<-metaprop(event = data_NonadherenceIBD_AnyTreatment$Nonadherence_Anytreatment_n, n = data_NonadherenceIBD_AnyTreatment$IBDAnytreatment_N, data=data_NonadherenceIBD_AnyTreatment, comb.random=TRUE, studlab=data_NonadherenceIBD_AnyTreatment$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+
+pdf(file="IBD/NonadherenceIBD_AnyTreatment.pdf", width=10,height = 6) 
+forest.meta(metaprop_NonadherenceIBD_AnyTreatment,layout =   "Revman")
+dev.off()
+
+
+data_NonadherenceIBD_Biologics <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Nonadherence_IBD")
+
+data_NonadherenceIBD_Biologics<-data_NonadherenceIBD_Biologics[order(data_NonadherenceIBD_Biologics$author),]
+data_NonadherenceIBD_Biologics<-data_NonadherenceIBD_Biologics[!is.na(data_NonadherenceIBD_Biologics$Nonadherence_Biologics_n), ]
+data_NonadherenceIBD_Biologics
+
+metaprop_NonadherenceIBD_Biologics<-metaprop(event = data_NonadherenceIBD_Biologics$Nonadherence_Biologics_n, n = data_NonadherenceIBD_Biologics$IBDBiologics_N, data=data_NonadherenceIBD_Biologics, comb.random=TRUE, studlab=data_NonadherenceIBD_Biologics$author,pscale = 100,method = "Inverse",comb.fixed = FALSE)
+
+pdf(file="IBD/NonadherenceIBD_Biologics.pdf", width=10,height = 6) 
+forest.meta(metaprop_NonadherenceIBD_Biologics,layout =   "Revman")
+dev.off()
+```
+
+
+```{r}
+data_COVIDUCvsCOVIDCD_Hospitalization <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDUCvsCOVIDCD")
+
+data_COVIDUCvsCOVIDCD_Hospitalization <-data_COVIDUCvsCOVIDCD_Hospitalization[order(data_COVIDUCvsCOVIDCD_Hospitalization$author),]
+
+data_COVIDUCvsCOVIDCD_Hospitalization
+
+data_COVIDUCvsCOVIDCD_Hospitalization<-data_COVIDUCvsCOVIDCD_Hospitalization[!is.na(data_COVIDUCvsCOVIDCD_Hospitalization$COVIDUC_Hospitalization_n)&!is.na(data_COVIDUCvsCOVIDCD_Hospitalization$COVIDCD_Hospitalization_n),]
+
+data_COVIDUCvsCOVIDCD_Hospitalization
+
+metaprop_data_COVIDUCvsCOVIDCD_Hospitalization<-metabin(event.e = data_COVIDUCvsCOVIDCD_Hospitalization$COVIDUC_Hospitalization_n,n.e = data_COVIDUCvsCOVIDCD_Hospitalization$COVIDUC_N,event.c = data_COVIDUCvsCOVIDCD_Hospitalization$COVIDCD_Hospitalization_n,n.c = data_COVIDUCvsCOVIDCD_Hospitalization$COVIDCD_N,studlab = data_COVIDUCvsCOVIDCD_Hospitalization$author,data = data_COVIDUCvsCOVIDCD_Hospitalization,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "UC",label.c = "CD",label.left = "Favours UC",label.right = "Favours CD")
+  
+pdf(file="IBD/COVIDUCvsCOVIDCD_Hospitalization.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_COVIDUCvsCOVIDCD_Hospitalization,layout =  "Revman")
+dev.off()
+
+
+data_COVIDUCvsCOVIDCD_ICU <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDUCvsCOVIDCD")
+
+data_COVIDUCvsCOVIDCD_ICU <-data_COVIDUCvsCOVIDCD_ICU[order(data_COVIDUCvsCOVIDCD_ICU$author),]
+
+data_COVIDUCvsCOVIDCD_ICU
+
+data_COVIDUCvsCOVIDCD_ICU<-data_COVIDUCvsCOVIDCD_ICU[!is.na(data_COVIDUCvsCOVIDCD_ICU$COVIDUC_ICU_n)&!is.na(data_COVIDUCvsCOVIDCD_ICU$COVIDCD_ICU_n),]
+
+data_COVIDUCvsCOVIDCD_ICU
+
+metaprop_data_COVIDUCvsCOVIDCD_ICU<-metabin(event.e = data_COVIDUCvsCOVIDCD_ICU$COVIDUC_ICU_n,n.e = data_COVIDUCvsCOVIDCD_ICU$COVIDUC_N,event.c = data_COVIDUCvsCOVIDCD_ICU$COVIDCD_ICU_n,n.c = data_COVIDUCvsCOVIDCD_ICU$COVIDCD_N,studlab = data_COVIDUCvsCOVIDCD_ICU$author,data = data_COVIDUCvsCOVIDCD_ICU,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "UC",label.c = "CD",label.left = "Favours UC",label.right = "Favours CD")
+  
+pdf(file="IBD/COVIDUCvsCOVIDCD_ICU.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_COVIDUCvsCOVIDCD_ICU,layout =  "Revman")
+dev.off()
+
+
+data_COVIDUCvsCOVIDCD_Death <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDUCvsCOVIDCD")
+
+data_COVIDUCvsCOVIDCD_Death <-data_COVIDUCvsCOVIDCD_Death[order(data_COVIDUCvsCOVIDCD_Death$author),]
+
+data_COVIDUCvsCOVIDCD_Death
+
+data_COVIDUCvsCOVIDCD_Death<-data_COVIDUCvsCOVIDCD_Death[!is.na(data_COVIDUCvsCOVIDCD_Death$COVIDUC_Death_n)&!is.na(data_COVIDUCvsCOVIDCD_Death$COVIDCD_Death_n),]
+
+data_COVIDUCvsCOVIDCD_Death
+
+metaprop_data_COVIDUCvsCOVIDCD_Death<-metabin(event.e = data_COVIDUCvsCOVIDCD_Death$COVIDUC_Death_n,n.e = data_COVIDUCvsCOVIDCD_Death$COVIDUC_N,event.c = data_COVIDUCvsCOVIDCD_Death$COVIDCD_Death_n,n.c = data_COVIDUCvsCOVIDCD_Death$COVIDCD_N,studlab = data_COVIDUCvsCOVIDCD_Death$author,data = data_COVIDUCvsCOVIDCD_Death,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "UC",label.c = "CD",label.left = "Favours UC",label.right = "Favours CD")
+  
+pdf(file="IBD/COVIDUCvsCOVIDCD_Death.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_COVIDUCvsCOVIDCD_Death,layout =  "Revman")
+dev.off()
+```
+
+```{r}
+
+data_COVIDUCvsCOVIDCD_Compare <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDUCCDvsTotalPopul")
+data_COVIDUCvsCOVIDCD_Compare
+
+data_COVIDUCvsCOVIDCD_Compare <-data_COVIDUCvsCOVIDCD_Compare[order(data_COVIDUCvsCOVIDCD_Compare$author),]
+
+data_COVIDUCvsCOVIDCD_Compare_byVar_UC<-data_COVIDUCvsCOVIDCD_Compare[,c("author","COVIDUC_n","TotalUC_N")]
+data_COVIDUCvsCOVIDCD_Compare_byVar_UC<-data_COVIDUCvsCOVIDCD_Compare_byVar_UC[!is.na(data_COVIDUCvsCOVIDCD_Compare_byVar_UC$COVIDUC_n), ]
+data_COVIDUCvsCOVIDCD_Compare_byVar_UC$group<-"UC"
+colnames(data_COVIDUCvsCOVIDCD_Compare_byVar_UC)
+colnames(data_COVIDUCvsCOVIDCD_Compare_byVar_UC)<-c("author","n", "N", "group")
+
+data_COVIDUCvsCOVIDCD_Compare_byVar_CD<-data_COVIDUCvsCOVIDCD_Compare[,c("author","COVIDCD_n","TotalCD_N")]
+data_COVIDUCvsCOVIDCD_Compare_byVar_CD<-data_COVIDUCvsCOVIDCD_Compare_byVar_CD[!is.na(data_COVIDUCvsCOVIDCD_Compare_byVar_CD$COVIDCD_n), ]
+data_COVIDUCvsCOVIDCD_Compare_byVar_CD$group<-"CD"
+colnames(data_COVIDUCvsCOVIDCD_Compare_byVar_CD)
+colnames(data_COVIDUCvsCOVIDCD_Compare_byVar_CD)<-c("author","n", "N", "group")
+
+data_COVIDUCvsCOVIDCD_Compare_byVar<-rbind(data_COVIDUCvsCOVIDCD_Compare_byVar_UC,data_COVIDUCvsCOVIDCD_Compare_byVar_CD)
+
+data_COVIDUCvsCOVIDCD_Compare_byVar<-data.frame(data_COVIDUCvsCOVIDCD_Compare_byVar)
+metaprop_COVIDUCvsCOVIDCD_Compare_byVar<-metaprop(event = n, n = N, data=data_COVIDUCvsCOVIDCD_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,pscale = 1000,method = "Inverse",byvar = group)
+
+pdf(file="IBD/COVIDUCvsCOVIDCD_Compare_byVariable.pdf", width=11,height = 12) 
+forest.meta(
+metaprop_COVIDUCvsCOVIDCD_Compare_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+
+
+
+
+data_COVIDUCvsCOVIDCD_AgainstTotal <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "COVIDUCCDvsTotalPopul")
+
+data_COVIDUCvsCOVIDCD_AgainstTotal <-data_COVIDUCvsCOVIDCD_AgainstTotal[order(data_COVIDUCvsCOVIDCD_AgainstTotal$author),]
+
+data_COVIDUCvsCOVIDCD_AgainstTotal
+
+data_COVIDUCvsCOVIDCD_AgainstTotal<-data_COVIDUCvsCOVIDCD_AgainstTotal[!is.na(data_COVIDUCvsCOVIDCD_AgainstTotal$COVIDUC_n)&!is.na(data_COVIDUCvsCOVIDCD_AgainstTotal$COVIDCD_n),]
+
+data_COVIDUCvsCOVIDCD_AgainstTotal
+
+metaprop_COVIDUCvsCOVIDCD_AgainstTotal<-metabin(event.e = data_COVIDUCvsCOVIDCD_AgainstTotal$COVIDUC_n,n.e = data_COVIDUCvsCOVIDCD_AgainstTotal$TotalUC_N,event.c = data_COVIDUCvsCOVIDCD_AgainstTotal$COVIDCD_n,n.c = data_COVIDUCvsCOVIDCD_AgainstTotal$TotalCD_N,studlab = data_COVIDUCvsCOVIDCD_AgainstTotal$author,data = data_COVIDUCvsCOVIDCD_AgainstTotal,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "UC",label.c = "CD",label.left = "Favours UC",label.right = "Favours CD")
+  
+pdf(file="IBD/COVIDUCvsCOVIDCD_AgainstTotal.pdf", width=10,height = 5) 
+forest.meta(metaprop_COVIDUCvsCOVIDCD_AgainstTotal,layout =  "Revman")
+dev.off()
+
+
+```
+
+
+
+```{r}
+data_IBDCOVID_Biologics_Hospitalization <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Biologics_Hospitalization <-data_IBDCOVID_Biologics_Hospitalization[order(data_IBDCOVID_Biologics_Hospitalization$author),]
+
+data_IBDCOVID_Biologics_Hospitalization
+
+data_IBDCOVID_Biologics_Hospitalization<-data_IBDCOVID_Biologics_Hospitalization[!is.na(data_IBDCOVID_Biologics_Hospitalization$IBDCOVID_BiologicsYes_Hospitalization_n)&!is.na(data_IBDCOVID_Biologics_Hospitalization$IBDCOVID_BiologicsNo_Hospitalization_n),]
+
+data_IBDCOVID_Biologics_Hospitalization
+
+metaprop_data_IBDCOVID_Biologics_Hospitalization<-metabin(event.e = data_IBDCOVID_Biologics_Hospitalization$IBDCOVID_BiologicsYes_Hospitalization_n,n.e = data_IBDCOVID_Biologics_Hospitalization$IBDCOVID_BiologicsYes_N  ,event.c = data_IBDCOVID_Biologics_Hospitalization$IBDCOVID_BiologicsNo_Hospitalization_n,n.c = data_IBDCOVID_Biologics_Hospitalization$IBDCOVID_BiologicsNo_N,studlab = data_IBDCOVID_Biologics_Hospitalization$author,data = data_IBDCOVID_Biologics_Hospitalization,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "Biologic +ve",label.c = "Biologic -ve",label.left = "Favours Biologics",label.right = "Favours no Biologics")
+  
+pdf(file="IBD/IBDCOVID_Biologics_Hospitalization.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Biologics_Hospitalization,layout =  "Revman")
+dev.off()
+
+data_IBDCOVID_Biologics_Mortality <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Biologics_Mortality <-data_IBDCOVID_Biologics_Mortality[order(data_IBDCOVID_Biologics_Mortality$author),]
+
+data_IBDCOVID_Biologics_Mortality
+
+data_IBDCOVID_Biologics_Mortality<-data_IBDCOVID_Biologics_Mortality[!is.na(data_IBDCOVID_Biologics_Mortality$IBDCOVID_BiologicsYes_Mortality_n)&!is.na(data_IBDCOVID_Biologics_Mortality$IBDCOVID_BiologicsNo_Mortality_n),]
+
+data_IBDCOVID_Biologics_Mortality
+
+metaprop_data_IBDCOVID_Biologics_Mortality<-metabin(event.e = data_IBDCOVID_Biologics_Mortality$IBDCOVID_BiologicsYes_Mortality_n,n.e = data_IBDCOVID_Biologics_Mortality$IBDCOVID_BiologicsYes_N  ,event.c = data_IBDCOVID_Biologics_Mortality$IBDCOVID_BiologicsNo_Mortality_n,n.c = data_IBDCOVID_Biologics_Mortality$IBDCOVID_BiologicsNo_N,studlab = data_IBDCOVID_Biologics_Mortality$author,data = data_IBDCOVID_Biologics_Mortality,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "Biologic +ve",label.c = "Biologic -ve",label.left = "Favours Biologics",label.right = "Favours no Biologics")
+  
+pdf(file="IBD/IBDCOVID_Biologics_Mortality.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Biologics_Mortality,layout =  "Revman")
+dev.off()
+
+
+data_IBDCOVID_Biologics_ICU <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Biologics_ICU <-data_IBDCOVID_Biologics_ICU[order(data_IBDCOVID_Biologics_ICU$author),]
+
+data_IBDCOVID_Biologics_ICU
+
+data_IBDCOVID_Biologics_ICU<-data_IBDCOVID_Biologics_ICU[!is.na(data_IBDCOVID_Biologics_ICU$IBDCOVID_BiologicsYes_ICU_n)&!is.na(data_IBDCOVID_Biologics_ICU$IBDCOVID_BiologicsNo_ICU_n),]
+
+data_IBDCOVID_Biologics_ICU
+
+metaprop_data_IBDCOVID_Biologics_ICU<-metabin(event.e = data_IBDCOVID_Biologics_ICU$IBDCOVID_BiologicsYes_ICU_n,n.e = data_IBDCOVID_Biologics_ICU$IBDCOVID_BiologicsYes_N  ,event.c = data_IBDCOVID_Biologics_ICU$IBDCOVID_BiologicsNo_ICU_n,n.c = data_IBDCOVID_Biologics_ICU$IBDCOVID_BiologicsNo_N,studlab = data_IBDCOVID_Biologics_ICU$author,data = data_IBDCOVID_Biologics_ICU,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "Biologic +ve",label.c = "Biologic -ve",label.left = "Favours Biologic",label.right = "Favours no Biologic")
+  
+pdf(file="IBD/IBDCOVID_Biologics_ICU.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Biologics_ICU,layout =  "Revman")
+dev.off()
+
+
+```
+
+```{r}
+data_IBDCOVID_Immunomodulator_Hospitalization <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Immunomodulator_Hospitalization <-data_IBDCOVID_Immunomodulator_Hospitalization[order(data_IBDCOVID_Immunomodulator_Hospitalization$author),]
+
+data_IBDCOVID_Immunomodulator_Hospitalization
+
+data_IBDCOVID_Immunomodulator_Hospitalization<-data_IBDCOVID_Immunomodulator_Hospitalization[!is.na(data_IBDCOVID_Immunomodulator_Hospitalization$IBDCOVID_ImmunomodulatorYes_Hospitalization_n)&!is.na(data_IBDCOVID_Immunomodulator_Hospitalization$IBDCOVID_ImmunomodulatorNo_Hospitalization_n),]
+
+data_IBDCOVID_Immunomodulator_Hospitalization
+
+metaprop_data_IBDCOVID_Immunomodulator_Hospitalization<-metabin(event.e = data_IBDCOVID_Immunomodulator_Hospitalization$IBDCOVID_ImmunomodulatorYes_Hospitalization_n,n.e = data_IBDCOVID_Immunomodulator_Hospitalization$IBDCOVID_ImmunomodulatorYes_N  ,event.c = data_IBDCOVID_Immunomodulator_Hospitalization$IBDCOVID_ImmunomodulatorNo_Hospitalization_n,n.c = data_IBDCOVID_Immunomodulator_Hospitalization$IBDCOVID_ImmunomodulatorNo_N,studlab = data_IBDCOVID_Immunomodulator_Hospitalization$author,data = data_IBDCOVID_Immunomodulator_Hospitalization,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "ImmMod +ve",label.c = "ImmMod -ve",label.left = "Favours \nImmunomodulator",label.right = "Favours no \nImmunomodulator")
+  
+pdf(file="IBD/IBDCOVID_Immunomodulator_Hospitalization.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Immunomodulator_Hospitalization,layout =  "Revman")
+dev.off()
+
+data_IBDCOVID_Immunomodulator_Mortality <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Immunomodulator_Mortality <-data_IBDCOVID_Immunomodulator_Mortality[order(data_IBDCOVID_Immunomodulator_Mortality$author),]
+
+data_IBDCOVID_Immunomodulator_Mortality
+
+data_IBDCOVID_Immunomodulator_Mortality<-data_IBDCOVID_Immunomodulator_Mortality[!is.na(data_IBDCOVID_Immunomodulator_Mortality$IBDCOVID_ImmunomodulatorYes_Mortality_n)&!is.na(data_IBDCOVID_Immunomodulator_Mortality$IBDCOVID_ImmunomodulatorNo_Mortality_n),]
+
+data_IBDCOVID_Immunomodulator_Mortality
+
+metaprop_data_IBDCOVID_Immunomodulator_Mortality<-metabin(event.e = data_IBDCOVID_Immunomodulator_Mortality$IBDCOVID_ImmunomodulatorYes_Mortality_n,n.e = data_IBDCOVID_Immunomodulator_Mortality$IBDCOVID_ImmunomodulatorYes_N  ,event.c = data_IBDCOVID_Immunomodulator_Mortality$IBDCOVID_ImmunomodulatorNo_Mortality_n,n.c = data_IBDCOVID_Immunomodulator_Mortality$IBDCOVID_ImmunomodulatorNo_N,studlab = data_IBDCOVID_Immunomodulator_Mortality$author,data = data_IBDCOVID_Immunomodulator_Mortality,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "ImmMod +ve",label.c = "ImmMod -ve",label.left = "Favours \nImmunomodulator",label.right = "Favours no \nImmunomodulator")
+  
+pdf(file="IBD/IBDCOVID_Immunomodulator_Mortality.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Immunomodulator_Mortality,layout =  "Revman")
+dev.off()
+
+
+data_IBDCOVID_Immunomodulator_ICU <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Immunomodulator_ICU <-data_IBDCOVID_Immunomodulator_ICU[order(data_IBDCOVID_Immunomodulator_ICU$author),]
+
+data_IBDCOVID_Immunomodulator_ICU
+
+data_IBDCOVID_Immunomodulator_ICU<-data_IBDCOVID_Immunomodulator_ICU[!is.na(data_IBDCOVID_Immunomodulator_ICU$IBDCOVID_ImmunomodulatorYes_ICU_n)&!is.na(data_IBDCOVID_Immunomodulator_ICU$IBDCOVID_ImmunomodulatorNo_ICU_n),]
+
+data_IBDCOVID_Immunomodulator_ICU
+
+metaprop_data_IBDCOVID_Immunomodulator_ICU<-metabin(event.e = data_IBDCOVID_Immunomodulator_ICU$IBDCOVID_ImmunomodulatorYes_ICU_n,n.e = data_IBDCOVID_Immunomodulator_ICU$IBDCOVID_ImmunomodulatorYes_N  ,event.c = data_IBDCOVID_Immunomodulator_ICU$IBDCOVID_ImmunomodulatorNo_ICU_n,n.c = data_IBDCOVID_Immunomodulator_ICU$IBDCOVID_ImmunomodulatorNo_N,studlab = data_IBDCOVID_Immunomodulator_ICU$author,data = data_IBDCOVID_Immunomodulator_ICU,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "ImmMod +ve",label.c = "ImmMod -ve",label.left = "Favours \nImmunomodulator",label.right = "Favours no \nImmunomodulator")
+  
+pdf(file="IBD/IBDCOVID_Immunomodulator_ICU.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Immunomodulator_ICU,layout =  "Revman")
+dev.off()
+
+```
+
+
+
+```{r}
+data_IBDCOVID_Steroid_Hospitalization <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Steroid_Hospitalization <-data_IBDCOVID_Steroid_Hospitalization[order(data_IBDCOVID_Steroid_Hospitalization$author),]
+
+data_IBDCOVID_Steroid_Hospitalization
+
+data_IBDCOVID_Steroid_Hospitalization<-data_IBDCOVID_Steroid_Hospitalization[!is.na(data_IBDCOVID_Steroid_Hospitalization$IBDCOVID_SteroidYes_Hospitalization_n)&!is.na(data_IBDCOVID_Steroid_Hospitalization$IBDCOVID_SteroidNo_Hospitalization_n),]
+
+data_IBDCOVID_Steroid_Hospitalization
+
+metaprop_data_IBDCOVID_Steroid_Hospitalization<-metabin(event.e = data_IBDCOVID_Steroid_Hospitalization$IBDCOVID_SteroidYes_Hospitalization_n,n.e = data_IBDCOVID_Steroid_Hospitalization$IBDCOVID_SteroidYes_N  ,event.c = data_IBDCOVID_Steroid_Hospitalization$IBDCOVID_SteroidNo_Hospitalization_n,n.c = data_IBDCOVID_Steroid_Hospitalization$IBDCOVID_SteroidNo_N,studlab = data_IBDCOVID_Steroid_Hospitalization$author,data = data_IBDCOVID_Steroid_Hospitalization,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "Steroid +ve",label.c = "Steroid -ve",label.left = "Favours Steroid",label.right = "Favours no Steroid")
+  
+pdf(file="IBD/IBDCOVID_Steroid_Hospitalization.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Steroid_Hospitalization,layout =  "Revman")
+dev.off()
+
+data_IBDCOVID_Steroid_Mortality <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Steroid_Mortality <-data_IBDCOVID_Steroid_Mortality[order(data_IBDCOVID_Steroid_Mortality$author),]
+
+data_IBDCOVID_Steroid_Mortality
+
+data_IBDCOVID_Steroid_Mortality<-data_IBDCOVID_Steroid_Mortality[!is.na(data_IBDCOVID_Steroid_Mortality$IBDCOVID_SteroidYes_Mortality_n)&!is.na(data_IBDCOVID_Steroid_Mortality$IBDCOVID_SteroidNo_Mortality_n),]
+
+data_IBDCOVID_Steroid_Mortality
+
+metaprop_data_IBDCOVID_Steroid_Mortality<-metabin(event.e = data_IBDCOVID_Steroid_Mortality$IBDCOVID_SteroidYes_Mortality_n,n.e = data_IBDCOVID_Steroid_Mortality$IBDCOVID_SteroidYes_N  ,event.c = data_IBDCOVID_Steroid_Mortality$IBDCOVID_SteroidNo_Mortality_n,n.c = data_IBDCOVID_Steroid_Mortality$IBDCOVID_SteroidNo_N,studlab = data_IBDCOVID_Steroid_Mortality$author,data = data_IBDCOVID_Steroid_Mortality,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "Steroid +ve",label.c = "Steroid -ve",label.left = "Favours Steroid",label.right = "Favours no Steroid")
+  
+pdf(file="IBD/IBDCOVID_Steroid_Mortality.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Steroid_Mortality,layout =  "Revman")
+dev.off()
+
+
+data_IBDCOVID_Steroid_ICU <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_Steroid_ICU <-data_IBDCOVID_Steroid_ICU[order(data_IBDCOVID_Steroid_ICU$author),]
+
+data_IBDCOVID_Steroid_ICU
+
+data_IBDCOVID_Steroid_ICU<-data_IBDCOVID_Steroid_ICU[!is.na(data_IBDCOVID_Steroid_ICU$IBDCOVID_SteroidYes_ICU_n)&!is.na(data_IBDCOVID_Steroid_ICU$IBDCOVID_SteroidNo_ICU_n),]
+
+data_IBDCOVID_Steroid_ICU
+
+metaprop_data_IBDCOVID_Steroid_ICU<-metabin(event.e = data_IBDCOVID_Steroid_ICU$IBDCOVID_SteroidYes_ICU_n,n.e = data_IBDCOVID_Steroid_ICU$IBDCOVID_SteroidYes_N  ,event.c = data_IBDCOVID_Steroid_ICU$IBDCOVID_SteroidNo_ICU_n,n.c = data_IBDCOVID_Steroid_ICU$IBDCOVID_SteroidNo_N,studlab = data_IBDCOVID_Steroid_ICU$author,data = data_IBDCOVID_Steroid_ICU,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "Steroid +ve",label.c = "Steroid -ve",label.left = "Favours Steroid",label.right = "Favours no Steroid")
+  
+pdf(file="IBD/IBDCOVID_Steroid_ICU.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_Steroid_ICU,layout =  "Revman")
+dev.off()
+
+
+```
+
+
+```{r}
+data_IBDCOVID_ASA_Hospitalization <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_ASA_Hospitalization <-data_IBDCOVID_ASA_Hospitalization[order(data_IBDCOVID_ASA_Hospitalization$author),]
+
+data_IBDCOVID_ASA_Hospitalization
+
+data_IBDCOVID_ASA_Hospitalization<-data_IBDCOVID_ASA_Hospitalization[!is.na(data_IBDCOVID_ASA_Hospitalization$IBDCOVID_ASAYes_Hospitalization_n)&!is.na(data_IBDCOVID_ASA_Hospitalization$IBDCOVID_ASANo_Hospitalization_n),]
+
+data_IBDCOVID_ASA_Hospitalization
+
+metaprop_data_IBDCOVID_ASA_Hospitalization<-metabin(event.e = data_IBDCOVID_ASA_Hospitalization$IBDCOVID_ASAYes_Hospitalization_n,n.e = data_IBDCOVID_ASA_Hospitalization$IBDCOVID_ASAYes_N  ,event.c = data_IBDCOVID_ASA_Hospitalization$IBDCOVID_ASANo_Hospitalization_n,n.c = data_IBDCOVID_ASA_Hospitalization$IBDCOVID_ASANo_N,studlab = data_IBDCOVID_ASA_Hospitalization$author,data = data_IBDCOVID_ASA_Hospitalization,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "ASA +ve",label.c = "ASA -ve",label.left = "Favours ASA",label.right = "Favours no ASA")
+  
+pdf(file="IBD/IBDCOVID_ASA_Hospitalization.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_ASA_Hospitalization,layout =  "Revman")
+dev.off()
+
+data_IBDCOVID_ASA_Mortality <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_ASA_Mortality <-data_IBDCOVID_ASA_Mortality[order(data_IBDCOVID_ASA_Mortality$author),]
+
+data_IBDCOVID_ASA_Mortality
+
+data_IBDCOVID_ASA_Mortality<-data_IBDCOVID_ASA_Mortality[!is.na(data_IBDCOVID_ASA_Mortality$IBDCOVID_ASAYes_Mortality_n)&!is.na(data_IBDCOVID_ASA_Mortality$IBDCOVID_ASANo_Mortality_n),]
+
+data_IBDCOVID_ASA_Mortality
+
+metaprop_data_IBDCOVID_ASA_Mortality<-metabin(event.e = data_IBDCOVID_ASA_Mortality$IBDCOVID_ASAYes_Mortality_n,n.e = data_IBDCOVID_ASA_Mortality$IBDCOVID_ASAYes_N  ,event.c = data_IBDCOVID_ASA_Mortality$IBDCOVID_ASANo_Mortality_n,n.c = data_IBDCOVID_ASA_Mortality$IBDCOVID_ASANo_N,studlab = data_IBDCOVID_ASA_Mortality$author,data = data_IBDCOVID_ASA_Mortality,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "ASA +ve",label.c = "ASA -ve",label.left = "Favours ASA",label.right = "Favours no ASA")
+  
+pdf(file="IBD/IBDCOVID_ASA_Mortality.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_ASA_Mortality,layout =  "Revman")
+dev.off()
+
+
+data_IBDCOVID_ASA_ICU <- read_xlsx("COVID IBD Datasheet_26_July.xlsx",sheet = "Drugs_Outcomes")
+
+data_IBDCOVID_ASA_ICU <-data_IBDCOVID_ASA_ICU[order(data_IBDCOVID_ASA_ICU$author),]
+
+data_IBDCOVID_ASA_ICU
+
+data_IBDCOVID_ASA_ICU<-data_IBDCOVID_ASA_ICU[!is.na(data_IBDCOVID_ASA_ICU$IBDCOVID_ASAYes_ICU_n)&!is.na(data_IBDCOVID_ASA_ICU$IBDCOVID_ASANo_ICU_n),]
+
+data_IBDCOVID_ASA_ICU
+
+metaprop_data_IBDCOVID_ASA_ICU<-metabin(event.e = data_IBDCOVID_ASA_ICU$IBDCOVID_ASAYes_ICU_n,n.e = data_IBDCOVID_ASA_ICU$IBDCOVID_ASAYes_N  ,event.c = data_IBDCOVID_ASA_ICU$IBDCOVID_ASANo_ICU_n,n.c = data_IBDCOVID_ASA_ICU$IBDCOVID_ASANo_N,studlab = data_IBDCOVID_ASA_ICU$author,data = data_IBDCOVID_ASA_ICU,method = "Inverse",sm = "RR",comb.fixed = FALSE,label.e = "ASA +ve",label.c = "ASA -ve",label.left = "Favours ASA",label.right = "Favours no ASA")
+  
+pdf(file="IBD/IBDCOVID_ASA_ICU.pdf", width=10,height = 5) 
+forest.meta(metaprop_data_IBDCOVID_ASA_ICU,layout =  "Revman")
+dev.off()
+
+```
