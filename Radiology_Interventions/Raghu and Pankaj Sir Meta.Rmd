@@ -1,0 +1,512 @@
+---
+title: "Raghu and Pankaj Sir Meta"
+output: html_document
+---
+
+```{r}
+
+library(readxl)
+library(meta)
+
+# View(Clinical_Success_Overall)
+```
+
+#Clinical_Success
+```{r}
+
+Clinical_Success_Overall <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Final excel 160620.xlsx", sheet = "Clinical_Success")
+Clinical_Success_Overall<-Clinical_Success_Overall[order(Clinical_Success_Overall$Author),]
+
+  
+
+Clinical_Success_Overall$SNo<-1:length(Clinical_Success_Overall$Author)
+metaprop_Clinical_Success_Overall<-metaprop(event = Clinical_Success_Overall$n, n = Clinical_Success_Overall$N, data=Clinical_Success_Overall, comb.random=TRUE,comb.fixed = FALSE, studlab=Clinical_Success_Overall$Author)
+
+metaprop_Clinical_Success_Overall_Baujat<-metaprop(event = Clinical_Success_Overall$n, n = Clinical_Success_Overall$N, data=Clinical_Success_Overall, comb.random=TRUE,comb.fixed = FALSE, studlab=Clinical_Success_Overall$SNo)
+
+baujat.meta(metaprop_Clinical_Success_Overall_Baujat)
+baujat.meta(metaprop_Clinical_Success_Overall)
+
+inf.analysis <- InfluenceAnalysis(x = metaprop_Clinical_Success_Overall,
+                                  random = TRUE)
+
+pdf(file="Clinical_Success_Overall_Baujat.pdf", width=10,height = 8) 
+baujat.meta(metaprop_Clinical_Success_Overall_Baujat)
+dev.off()
+
+write.csv(data.frame(Clinical_Success_Overall$SNo,Clinical_Success_Overall$Author),file = "legend_Clinical_Success_Overall_Baujat.csv")
+
+pdf(file="Clinical_Success_Overall.pdf", width=10,height = 8) 
+forest.meta(metaprop_Clinical_Success_Overall,layout =   "revman")
+dev.off()
+
+
+
+Clinical_Success_byVar_FU<-Clinical_Success_Overall
+Clinical_Success_byVar_FU<-Clinical_Success_byVar_FU[!is.na(Clinical_Success_byVar_FU$`Follow up Categorical`), ]
+
+Clinical_Success_byVar_FU$`Follow up Categorical`<-as.factor(Clinical_Success_byVar_FU$`Follow up Categorical`)
+levels(Clinical_Success_byVar_FU$`Follow up Categorical`)
+
+Clinical_Success_byVar_FU$`Follow up Categorical`<-factor(x = Clinical_Success_byVar_FU$`Follow up Categorical`,levels = c("<= 3 months","> 3 to <=12 months","> 12 months"))
+library(plyr)
+Clinical_Success_byVar_FU$`Follow up Categorical`<-mapvalues(Clinical_Success_byVar_FU$`Follow up Categorical`,from = c("<= 3 months","> 3 to <=12 months","> 12 months"),to = c("Clinical success <= 3 months","Clinical success > 3 to <=12 months","Clinical success > 12 months") )
+
+colnames(Clinical_Success_byVar_FU)[5]<-"Duration of follow-up"
+metaprop_Clinical_Success_byVar_FU<-metaprop(event = Clinical_Success_byVar_FU$n, n = Clinical_Success_byVar_FU$N, data=Clinical_Success_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=Clinical_Success_byVar_FU$Author,byvar = Clinical_Success_byVar_FU$`Duration of follow-up`)
+
+pdf(file="Clinical_Success_byVar_FU.pdf", width=10,height = 10) 
+forest.meta(metaprop_Clinical_Success_byVar_FU,layout =   "revman")
+dev.off()
+
+Clinical_Success_byVar_EmbolizationAgent<-Clinical_Success_Overall
+Clinical_Success_byVar_EmbolizationAgent<-Clinical_Success_byVar_EmbolizationAgent[!is.na(Clinical_Success_byVar_EmbolizationAgent$EmbolizationAgent), ]
+
+Clinical_Success_byVar_EmbolizationAgent$EmbolizationAgent<-as.factor(Clinical_Success_byVar_EmbolizationAgent$EmbolizationAgent)
+levels(Clinical_Success_byVar_EmbolizationAgent$EmbolizationAgent)
+
+Clinical_Success_byVar_EmbolizationAgent$EmbolizationAgent<-factor(x = Clinical_Success_byVar_EmbolizationAgent$EmbolizationAgent,levels = c(1,2))
+library(plyr)
+Clinical_Success_byVar_EmbolizationAgent$EmbolizationAgent<-mapvalues(Clinical_Success_byVar_EmbolizationAgent$EmbolizationAgent,from = c(1,2),to = c("Coil", "Coil plus others") )
+
+colnames(Clinical_Success_byVar_EmbolizationAgent)[7]<-"Embolization agent"
+metaprop_Clinical_Success_byVar_EmbolizationAgent<-metaprop(event = Clinical_Success_byVar_EmbolizationAgent$n, n = Clinical_Success_byVar_EmbolizationAgent$N, data=Clinical_Success_byVar_EmbolizationAgent, comb.random=TRUE,comb.fixed = FALSE, studlab=Clinical_Success_byVar_EmbolizationAgent$Author,byvar = Clinical_Success_byVar_EmbolizationAgent$`Embolization agent`)
+
+pdf(file="Clinical_Success_byVar_EmbolizationAgent.pdf", width=10,height = 10) 
+forest.meta(metaprop_Clinical_Success_byVar_EmbolizationAgent,layout =   "revman")
+dev.off()
+
+
+Clinical_Success_byVar_YearStudy<-Clinical_Success_Overall
+Clinical_Success_byVar_YearStudy<-Clinical_Success_byVar_YearStudy[!is.na(Clinical_Success_byVar_YearStudy$YearStudy), ]
+
+Clinical_Success_byVar_YearStudy$YearStudy<-as.numeric(Clinical_Success_byVar_YearStudy$YearStudy)
+Clinical_Success_byVar_YearStudy$YearStudyCat<-ifelse(test = Clinical_Success_byVar_YearStudy$YearStudy<2005,"< 2005",">= 2005")
+Clinical_Success_byVar_YearStudy$YearStudyCat<-as.factor(Clinical_Success_byVar_YearStudy$YearStudyCat)
+# Clinical_Success_byVar_YearStudy$YearStudy<-factor(x = Clinical_Success_byVar_YearStudy$YearStudy,levels = c(1,2))
+# library(plyr)
+Clinical_Success_byVar_YearStudy$YearStudyCat<-mapvalues(Clinical_Success_byVar_YearStudy$YearStudyCat,from = c("< 2005",">= 2005"),to = c("Less than 2005","Greater than equal to 2005") )
+
+colnames(Clinical_Success_byVar_YearStudy)[8]<-"Study year"
+metaprop_Clinical_Success_byVar_YearStudy<-metaprop(event = Clinical_Success_byVar_YearStudy$n, n = Clinical_Success_byVar_YearStudy$N, data=Clinical_Success_byVar_YearStudy, comb.random=TRUE,comb.fixed = FALSE, studlab=Clinical_Success_byVar_YearStudy$Author,byvar = Clinical_Success_byVar_YearStudy$`Study year`)
+
+pdf(file="Clinical_Success_byVar_YearStudy.pdf", width=10,height = 10) 
+forest.meta(metaprop_Clinical_Success_byVar_YearStudy,layout =   "revman")
+dev.off()
+
+```
+
+#Technical_Success
+```{r}
+Technical_Success_Overall <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Final excel 160620.xlsx", sheet = "Technical_Success")
+Technical_Success_Overall<-Technical_Success_Overall[order(Technical_Success_Overall$Author),]
+Technical_Success_Overall$SNo<-1:length(Technical_Success_Overall$Author)
+
+metaprop_Technical_Success_Overall<-metaprop(event = Technical_Success_Overall$n, n = Technical_Success_Overall$N, data=Technical_Success_Overall, comb.random=TRUE,comb.fixed = FALSE, studlab=Technical_Success_Overall$Author)
+
+metaprop_Technical_Success_Overall_Baujat<-metaprop(event = Technical_Success_Overall$n, n = Technical_Success_Overall$N, data=Technical_Success_Overall, comb.random=TRUE,comb.fixed = FALSE, studlab=Technical_Success_Overall$SNo)
+
+
+pdf(file="Technical_Success_Overall.pdf", width=10,height = 8) 
+forest.meta(metaprop_Technical_Success_Overall,layout =   "revman")
+dev.off()
+
+
+pdf(file="Technical_Success_Overall_Baujat.pdf", width=10,height = 8) 
+baujat.meta(metaprop_Technical_Success_Overall_Baujat)
+dev.off()
+write.csv(data.frame(Technical_Success_Overall$SNo,Technical_Success_Overall$Author),"legend_Technical_Success_Overall_Baujat.csv")
+
+
+
+Technical_Success_byVar_EmbolizationAgent<-Technical_Success_Overall
+Technical_Success_byVar_EmbolizationAgent<-Technical_Success_byVar_EmbolizationAgent[!is.na(Technical_Success_byVar_EmbolizationAgent$EmbolizationAgent), ]
+
+Technical_Success_byVar_EmbolizationAgent$EmbolizationAgent<-as.factor(Technical_Success_byVar_EmbolizationAgent$EmbolizationAgent)
+levels(Technical_Success_byVar_EmbolizationAgent$EmbolizationAgent)
+
+Technical_Success_byVar_EmbolizationAgent$EmbolizationAgent<-factor(x = Technical_Success_byVar_EmbolizationAgent$EmbolizationAgent,levels = c(1,2))
+library(plyr)
+Technical_Success_byVar_EmbolizationAgent$EmbolizationAgent<-mapvalues(Technical_Success_byVar_EmbolizationAgent$EmbolizationAgent,from = c(1,2),to = c("Coil", "Coil plus others") )
+
+colnames(Technical_Success_byVar_EmbolizationAgent)[5]<-"Embolization agent"
+metaprop_Technical_Success_byVar_EmbolizationAgent<-metaprop(event = Technical_Success_byVar_EmbolizationAgent$n, n = Technical_Success_byVar_EmbolizationAgent$N, data=Technical_Success_byVar_EmbolizationAgent, comb.random=TRUE,comb.fixed = FALSE, studlab=Technical_Success_byVar_EmbolizationAgent$Author,byvar = Technical_Success_byVar_EmbolizationAgent$`Embolization agent`)
+
+pdf(file="Technical_Success_byVar_EmbolizationAgent.pdf", width=10,height = 10) 
+forest.meta(metaprop_Technical_Success_byVar_EmbolizationAgent,layout =   "revman")
+dev.off()
+
+
+Technical_Success_byVar_YearStudy<-Technical_Success_Overall
+Technical_Success_byVar_YearStudy<-Technical_Success_byVar_YearStudy[!is.na(Technical_Success_byVar_YearStudy$YearStudy), ]
+
+Technical_Success_byVar_YearStudy$YearStudy<-as.numeric(Technical_Success_byVar_YearStudy$YearStudy)
+Technical_Success_byVar_YearStudy$YearStudyCat<-ifelse(test = Technical_Success_byVar_YearStudy$YearStudy<2005,"< 2005",">= 2005")
+Technical_Success_byVar_YearStudy$YearStudyCat<-as.factor(Technical_Success_byVar_YearStudy$YearStudyCat)
+# Technical_Success_byVar_YearStudy$YearStudy<-factor(x = Technical_Success_byVar_YearStudy$YearStudy,levels = c(1,2))
+# library(plyr)
+Technical_Success_byVar_YearStudy$YearStudyCat<-mapvalues(Technical_Success_byVar_YearStudy$YearStudyCat,from = c("< 2005",">= 2005"),to = c("Less than 2005","Greater than equal to 2005") )
+
+colnames(Technical_Success_byVar_YearStudy)[7]
+colnames(Technical_Success_byVar_YearStudy)[7]<-"Study year"
+metaprop_Technical_Success_byVar_YearStudy<-metaprop(event = Technical_Success_byVar_YearStudy$n, n = Technical_Success_byVar_YearStudy$N, data=Technical_Success_byVar_YearStudy, comb.random=TRUE,comb.fixed = FALSE, studlab=Technical_Success_byVar_YearStudy$Author,byvar = Technical_Success_byVar_YearStudy$`Study year`)
+
+pdf(file="Technical_Success_byVar_YearStudy.pdf", width=10,height = 10) 
+forest.meta(metaprop_Technical_Success_byVar_YearStudy,layout =   "revman")
+dev.off()
+
+```
+
+#Rebleed_Rate
+```{r}
+Rebleed_Rate_Overall <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Final excel 160620.xlsx", sheet = "Rebleed_Rate")
+Rebleed_Rate_Overall<-Rebleed_Rate_Overall[order(Rebleed_Rate_Overall$Author),]
+Rebleed_Rate_Overall$SNo<-1:length(Rebleed_Rate_Overall$Author)
+
+metaprop_Rebleed_Rate_Overall<-metaprop(event = Rebleed_Rate_Overall$n, n = Rebleed_Rate_Overall$N, data=Rebleed_Rate_Overall, comb.random=TRUE,comb.fixed = FALSE, studlab=Rebleed_Rate_Overall$Author)
+
+metaprop_Rebleed_Rate_Overall_Baujat<-metaprop(event = Rebleed_Rate_Overall$n, n = Rebleed_Rate_Overall$N, data=Rebleed_Rate_Overall, comb.random=TRUE,comb.fixed = FALSE, studlab=Rebleed_Rate_Overall$SNo)
+
+pdf(file="Rebleed_Rate_Overall.pdf", width=10,height = 8) 
+forest.meta(metaprop_Rebleed_Rate_Overall,layout =   "revman")
+dev.off()
+
+
+pdf(file="Rebleed_Rate_Overall_Baujat.pdf", width=10,height = 8) 
+baujat.meta(metaprop_Rebleed_Rate_Overall_Baujat)
+dev.off()
+
+write.csv(data.frame(Rebleed_Rate_Overall$SNo,Rebleed_Rate_Overall$Author),"legend_Rebleed_Rate_Overall_Baujat.csv")
+```
+
+
+#Mortality
+```{r}
+Mortality_Overall <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Final excel 160620.xlsx", sheet = "Mortality")
+Mortality_Overall<-Mortality_Overall[order(Mortality_Overall$Author),]
+Mortality_Overall$SNo<-1:length(Mortality_Overall$Author)
+
+metaprop_Mortality_Overall<-metaprop(event = Mortality_Overall$n, n = Mortality_Overall$N, data=Mortality_Overall, comb.random=TRUE,comb.fixed = FALSE, studlab=Mortality_Overall$Author)
+
+metaprop_Mortality_Overall_Baujat<-metaprop(event = Mortality_Overall$n, n = Mortality_Overall$N, data=Mortality_Overall, comb.random=TRUE,comb.fixed = FALSE, studlab=Mortality_Overall$SNo)
+
+pdf(file="Mortality_Overall.pdf", width=10,height = 8) 
+forest.meta(metaprop_Mortality_Overall,layout =   "revman")
+dev.off()
+
+
+pdf(file="Mortality_Overall_Baujat.pdf", width=10,height = 8) 
+baujat.meta(metaprop_Mortality_Overall_Baujat)
+dev.off()
+
+write.csv(data.frame(Mortality_Overall$SNo,Mortality_Overall$Author),"legend_Mortality_Overall_Baujat.csv")
+
+
+Mortality_byVar_EmbolizationAgent<-Mortality_Overall
+Mortality_byVar_EmbolizationAgent<-Mortality_byVar_EmbolizationAgent[!is.na(Mortality_byVar_EmbolizationAgent$EmbolizationAgent), ]
+
+Mortality_byVar_EmbolizationAgent$EmbolizationAgent<-as.factor(Mortality_byVar_EmbolizationAgent$EmbolizationAgent)
+levels(Mortality_byVar_EmbolizationAgent$EmbolizationAgent)
+
+Mortality_byVar_EmbolizationAgent$EmbolizationAgent<-factor(x = Mortality_byVar_EmbolizationAgent$EmbolizationAgent,levels = c(1,2))
+library(plyr)
+Mortality_byVar_EmbolizationAgent$EmbolizationAgent<-mapvalues(Mortality_byVar_EmbolizationAgent$EmbolizationAgent,from = c(1,2),to = c("Coil", "Coil plus others") )
+
+colnames(Mortality_byVar_EmbolizationAgent)[5]<-"Embolization agent"
+metaprop_Mortality_byVar_EmbolizationAgent<-metaprop(event = Mortality_byVar_EmbolizationAgent$n, n = Mortality_byVar_EmbolizationAgent$N, data=Mortality_byVar_EmbolizationAgent, comb.random=TRUE,comb.fixed = FALSE, studlab=Mortality_byVar_EmbolizationAgent$Author,byvar = Mortality_byVar_EmbolizationAgent$`Embolization agent`)
+
+pdf(file="Mortality_byVar_EmbolizationAgent.pdf", width=10,height = 10) 
+forest.meta(metaprop_Mortality_byVar_EmbolizationAgent,layout =   "revman")
+dev.off()
+
+
+Mortality_byVar_YearStudy<-Mortality_Overall
+Mortality_byVar_YearStudy<-Mortality_byVar_YearStudy[!is.na(Mortality_byVar_YearStudy$YearStudy), ]
+
+Mortality_byVar_YearStudy$YearStudy<-as.numeric(Mortality_byVar_YearStudy$YearStudy)
+Mortality_byVar_YearStudy$YearStudyCat<-ifelse(test = Mortality_byVar_YearStudy$YearStudy<2005,"< 2005",">= 2005")
+Mortality_byVar_YearStudy$YearStudyCat<-as.factor(Mortality_byVar_YearStudy$YearStudyCat)
+# Mortality_byVar_YearStudy$YearStudy<-factor(x = Mortality_byVar_YearStudy$YearStudy,levels = c(1,2))
+# library(plyr)
+Mortality_byVar_YearStudy$YearStudyCat<-mapvalues(Mortality_byVar_YearStudy$YearStudyCat,from = c("< 2005",">= 2005"),to = c("Less than 2005","Greater than equal to 2005") )
+
+colnames(Mortality_byVar_YearStudy)[7]
+colnames(Mortality_byVar_YearStudy)[7]<-"Study year"
+metaprop_Mortality_byVar_YearStudy<-metaprop(event = Mortality_byVar_YearStudy$n, n = Mortality_byVar_YearStudy$N, data=Mortality_byVar_YearStudy, comb.random=TRUE,comb.fixed = FALSE, studlab=Mortality_byVar_YearStudy$Author,byvar = Mortality_byVar_YearStudy$`Study year`)
+
+pdf(file="Mortality_byVar_YearStudy.pdf", width=10,height = 10) 
+forest.meta(metaprop_Mortality_byVar_YearStudy,layout =   "revman")
+dev.off()
+
+
+```
+
+
+
+```{r}
+
+library(readxl)
+library(meta)
+data_PSA <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Revision_Pancreatology_Data_Import.xlsx", 
+     sheet = "PSA_APvsCP")
+# View(data_PSA) 
+
+data_PSA <-data_PSA[order(data_PSA$author),]
+
+data_PSA_byVar_AP<-data_PSA[,c("author","PSA_AP_n","TotalPSA_AP_N")]
+data_PSA_byVar_AP<-data_PSA_byVar_AP[!is.na(data_PSA_byVar_AP$PSA_AP_n), ]
+data_PSA_byVar_AP$group<-"AP"
+colnames(data_PSA_byVar_AP)
+colnames(data_PSA_byVar_AP)<-c("author","n", "N", "group")
+
+data_PSA_byVar_CP<-data_PSA[,c("author","PSA_CP_n","TotalPSA_CP_N")]
+data_PSA_byVar_CP<-data_PSA_byVar_CP[!is.na(data_PSA_byVar_CP$PSA_CP_n), ]
+data_PSA_byVar_CP$group<-"CP"
+colnames(data_PSA_byVar_CP)
+colnames(data_PSA_byVar_CP)<-c("author","n", "N", "group")
+
+data_PSA_Compare_byVar<-rbind(data_PSA_byVar_AP,data_PSA_byVar_CP)
+
+data_PSA_Compare_byVar<-data.frame(data_PSA_Compare_byVar)
+metaprop_PSA_byVar<-metaprop(event = n, n = N, data=data_PSA_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,byvar = group)
+
+pdf(file="PSA_APvsCP_Compare_byVariable.pdf", width=9,height = 8) 
+forest.meta(metaprop_PSA_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+data_PSA_Compare <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Revision_Pancreatology_Data_Import.xlsx", 
+     sheet = "PSA_APvsCP")
+
+data_PSA_Compare <-data_PSA_Compare[order(data_PSA_Compare$author),]
+
+data_PSA_Compare
+
+data_PSA_Compare<-data_PSA_Compare[!is.na(data_PSA_Compare$PSA_AP_n)&!is.na(data_PSA_Compare$PSA_CP_n),]
+data_PSA_Compare
+
+
+metaprop_PSA_Compare<-metabin(event.e = data_PSA_Compare$PSA_AP_n,n.e = data_PSA_Compare$TotalPSA_AP_N,event.c = data_PSA_Compare$PSA_CP_n,n.c = data_PSA_Compare$TotalPSA_CP_N,studlab = author,data = data_PSA_Compare,sm = "OR",comb.fixed = FALSE,label.e = "AP",label.c = "CP")
+  
+pdf(file="PSAAPvsCP_Compare.pdf", width=10,height = 5) 
+forest.meta(metaprop_PSA_Compare,layout =  "Revman")
+dev.off()
+```
+
+```{r}
+library(readxl)
+library(meta)
+data_CS <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Revision_Pancreatology_Data_Import.xlsx", 
+     sheet = "ClinicalSuccess_APvsCP")
+# View(data_CS) 
+
+data_CS <-data_CS[order(data_CS$author),]
+
+data_CS_byVar_AP<-data_CS[,c("author","CS_AP_n","TotalCS_AP_N")]
+data_CS_byVar_AP<-data_CS_byVar_AP[!is.na(data_CS_byVar_AP$CS_AP_n), ]
+data_CS_byVar_AP$group<-"AP"
+colnames(data_CS_byVar_AP)
+colnames(data_CS_byVar_AP)<-c("author","n", "N", "group")
+
+data_CS_byVar_CP<-data_CS[,c("author","CS_CP_n","TotalCS_CP_N")]
+data_CS_byVar_CP<-data_CS_byVar_CP[!is.na(data_CS_byVar_CP$CS_CP_n), ]
+data_CS_byVar_CP$group<-"CP"
+colnames(data_CS_byVar_CP)
+colnames(data_CS_byVar_CP)<-c("author","n", "N", "group")
+
+data_CS_Compare_byVar<-rbind(data_CS_byVar_AP,data_CS_byVar_CP)
+
+data_CS_Compare_byVar<-data.frame(data_CS_Compare_byVar)
+metaprop_CS_byVar<-metaprop(event = n, n = N, data=data_CS_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,byvar = group)
+
+pdf(file="CS_APvsCP_Compare_byVariable.pdf", width=9,height = 8) 
+forest.meta(metaprop_CS_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+data_CS_Compare <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Revision_Pancreatology_Data_Import.xlsx", 
+     sheet = "ClinicalSuccess_APvsCP")
+
+data_CS_Compare <-data_CS_Compare[order(data_CS_Compare$author),]
+
+data_CS_Compare
+
+data_CS_Compare<-data_CS_Compare[!is.na(data_CS_Compare$CS_AP_n)&!is.na(data_CS_Compare$CS_CP_n),]
+data_CS_Compare
+
+
+metaprop_CS_Compare<-metabin(event.e = data_CS_Compare$CS_AP_n,n.e = data_CS_Compare$TotalCS_AP_N,event.c = data_CS_Compare$CS_CP_n,n.c = data_CS_Compare$TotalCS_CP_N,studlab = author,data = data_CS_Compare,sm = "OR",comb.fixed = FALSE,label.e = "AP",label.c = "CP")
+  
+pdf(file="CSAPvsCP_Compare.pdf", width=10,height = 5) 
+forest.meta(metaprop_CS_Compare,layout =  "Revman")
+dev.off()
+```
+
+
+```{r}
+library(readxl)
+library(meta)
+data_TS <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Revision_Pancreatology_Data_Import.xlsx", 
+     sheet = "TechnicalSuccess_APvsCP")
+# View(data_TS) 
+
+data_TS <-data_TS[order(data_TS$author),]
+
+data_TS_byVar_AP<-data_TS[,c("author","TS_AP_n","TotalTS_AP_N")]
+data_TS_byVar_AP<-data_TS_byVar_AP[!is.na(data_TS_byVar_AP$TS_AP_n), ]
+data_TS_byVar_AP$group<-"AP"
+colnames(data_TS_byVar_AP)
+colnames(data_TS_byVar_AP)<-c("author","n", "N", "group")
+
+data_TS_byVar_CP<-data_TS[,c("author","TS_CP_n","TotalTS_CP_N")]
+data_TS_byVar_CP<-data_TS_byVar_CP[!is.na(data_TS_byVar_CP$TS_CP_n), ]
+data_TS_byVar_CP$group<-"CP"
+colnames(data_TS_byVar_CP)
+colnames(data_TS_byVar_CP)<-c("author","n", "N", "group")
+
+data_TS_Compare_byVar<-rbind(data_TS_byVar_AP,data_TS_byVar_CP)
+
+data_TS_Compare_byVar<-data.frame(data_TS_Compare_byVar)
+metaprop_TS_byVar<-metaprop(event = n, n = N, data=data_TS_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,byvar = group)
+
+pdf(file="TS_APvsCP_Compare_byVariable.pdf", width=9,height = 8) 
+forest.meta(metaprop_TS_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+data_TS_Compare <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Revision_Pancreatology_Data_Import.xlsx", 
+     sheet = "TechnicalSuccess_APvsCP")
+
+data_TS_Compare <-data_TS_Compare[order(data_TS_Compare$author),]
+
+data_TS_Compare
+
+data_TS_Compare<-data_TS_Compare[!is.na(data_TS_Compare$TS_AP_n)&!is.na(data_TS_Compare$TS_CP_n),]
+data_TS_Compare
+
+
+metaprop_TS_Compare<-metabin(event.e = data_TS_Compare$TS_AP_n,n.e = data_TS_Compare$TotalTS_AP_N,event.c = data_TS_Compare$TS_CP_n,n.c = data_TS_Compare$TotalTS_CP_N,studlab = author,data = data_TS_Compare,sm = "OR",comb.fixed = FALSE,label.e = "AP",label.c = "CP")
+  
+pdf(file="TSAPvsCP_Compare.pdf", width=10,height = 5) 
+forest.meta(metaprop_TS_Compare,layout =  "Revman")
+dev.off()
+```
+  
+```{r}
+Clinical_Success_Overall <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Final excel 160620.xlsx", sheet = "Clinical_Success")
+Clinical_Success_Overall<-Clinical_Success_Overall[order(Clinical_Success_Overall$Author),]
+Clinical_Success_Overall$SNo<-1:length(Clinical_Success_Overall$Author)
+Clinical_Success_Overall_Modified<-Clinical_Success_Overall[-c(4,25,21),]
+
+metaprop_Clinical_Success_Overall_Modified<-metaprop(event = Clinical_Success_Overall_Modified$n, n = Clinical_Success_Overall_Modified$N, data=Clinical_Success_Overall_Modified, comb.random=TRUE,comb.fixed = FALSE, studlab=Clinical_Success_Overall_Modified$Author)
+
+pdf(file="Clinical_Success_Overall_Modified.pdf", width=10,height = 8) 
+forest.meta(metaprop_Clinical_Success_Overall_Modified,layout = "Revman")
+dev.off()
+
+Technical_Success_Overall <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Final excel 160620.xlsx", sheet = "Technical_Success")
+Technical_Success_Overall<-Technical_Success_Overall[order(Technical_Success_Overall$Author),]
+Technical_Success_Overall$SNo<-1:length(Technical_Success_Overall$Author)
+Technical_Success_Overall_Modified<-Technical_Success_Overall[-c(20,22,17,21,4,12),]
+
+metaprop_Technical_Success_Overall_Modified<-metaprop(event = Technical_Success_Overall_Modified$n, n = Technical_Success_Overall_Modified$N, data=Technical_Success_Overall_Modified, comb.random=TRUE,comb.fixed = FALSE, studlab=Technical_Success_Overall_Modified$Author)
+
+pdf(file="Technical_Success_Overall_Modified.pdf", width=10,height = 8) 
+forest.meta(metaprop_Technical_Success_Overall_Modified,layout = "Revman")
+dev.off()
+
+Rebleed_Rate_Overall <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Final excel 160620.xlsx", sheet = "Rebleed_Rate")
+Rebleed_Rate_Overall<-Rebleed_Rate_Overall[order(Rebleed_Rate_Overall$Author),]
+Rebleed_Rate_Overall$SNo<-1:length(Rebleed_Rate_Overall$Author)
+Rebleed_Rate_Overall_Modified<-Rebleed_Rate_Overall[-c(4,25,21),]
+
+metaprop_Rebleed_Rate_Overall_Modified<-metaprop(event = Rebleed_Rate_Overall_Modified$n, n = Rebleed_Rate_Overall_Modified$N, data=Rebleed_Rate_Overall_Modified, comb.random=TRUE,comb.fixed = FALSE, studlab=Rebleed_Rate_Overall_Modified$Author)
+
+pdf(file="Rebleed_Rate_Overall_Modified.pdf", width=10,height = 8) 
+forest.meta(metaprop_Rebleed_Rate_Overall_Modified,layout = "Revman")
+dev.off()
+
+
+Mortality_Overall <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Final excel 160620.xlsx", sheet = "Mortality")
+Mortality_Overall<-Mortality_Overall[order(Mortality_Overall$Author),]
+Mortality_Overall$SNo<-1:length(Mortality_Overall$Author)
+Mortality_Overall_Modified<-Mortality_Overall[-c(21,14,18,16,15,12,20),]
+
+metaprop_Mortality_Overall_Modified<-metaprop(event = Mortality_Overall_Modified$n, n = Mortality_Overall_Modified$N, data=Mortality_Overall_Modified, comb.random=TRUE,comb.fixed = FALSE, studlab=Mortality_Overall_Modified$Author)
+
+pdf(file="Mortality_Overall_Modified.pdf", width=10,height = 8) 
+forest.meta(metaprop_Mortality_Overall_Modified,layout = "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+
+
+```
+  
+  
+```{r}
+inf.analysis_Clinical_Success_Overall <- InfluenceAnalysis(x = metaprop_Clinical_Success_Overall,random = TRUE)
+inf.analysis_Technical_Success_Overall <- InfluenceAnalysis(x = metaprop_Technical_Success_Overall,random=TRUE)
+inf.analysis_Rebleed_Rate_Overall <- InfluenceAnalysis(x = metaprop_Rebleed_Rate_Overall,random = TRUE)
+inf.analysis_Mortality_Overall <- InfluenceAnalysis(x = metaprop_Mortality_Overall,random = TRUE)
+
+pdf(file="Leave out one analysis 1.pdf", width=10,height = 8) 
+plot(inf.analysis_Technical_Success_Overall, "i2")
+dev.off()
+pdf(file="Leave out one analysis 2.pdf", width=10,height = 8) 
+plot(inf.analysis_Clinical_Success_Overall, "i2")
+dev.off()
+pdf(file="Leave out one analysis 3.pdf", width=10,height = 8) 
+plot(inf.analysis_Rebleed_Rate_Overall, "i2")
+dev.off()
+pdf(file="Leave out one analysis 4.pdf", width=10,height = 8) 
+plot(inf.analysis_Mortality_Overall, "i2")
+dev.off()
+
+```
+
+```{r}
+library(readxl)
+library(meta)
+data_Mortality <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Revision_Pancreatology_Data_Import.xlsx", 
+     sheet = "Mortality_APvsCP")
+# View(data_Mortality) 
+
+data_Mortality <-data_Mortality[order(data_Mortality$author),]
+
+data_Mortality_byVar_AP<-data_Mortality[,c("author","Mortality_AP_n","TotalMortality_AP_N")]
+data_Mortality_byVar_AP<-data_Mortality_byVar_AP[!is.na(data_Mortality_byVar_AP$Mortality_AP_n), ]
+data_Mortality_byVar_AP$group<-"AP"
+colnames(data_Mortality_byVar_AP)
+colnames(data_Mortality_byVar_AP)<-c("author","n", "N", "group")
+
+data_Mortality_byVar_CP<-data_Mortality[,c("author","Mortality_CP_n","TotalMortality_CP_N")]
+data_Mortality_byVar_CP<-data_Mortality_byVar_CP[!is.na(data_Mortality_byVar_CP$Mortality_CP_n), ]
+data_Mortality_byVar_CP$group<-"CP"
+colnames(data_Mortality_byVar_CP)
+colnames(data_Mortality_byVar_CP)<-c("author","n", "N", "group")
+
+data_Mortality_Compare_byVar<-rbind(data_Mortality_byVar_AP,data_Mortality_byVar_CP)
+
+data_Mortality_Compare_byVar<-data.frame(data_Mortality_Compare_byVar)
+metaprop_Mortality_byVar<-metaprop(event = n, n = N, data=data_Mortality_Compare_byVar, comb.random=TRUE,comb.fixed = FALSE, studlab=author,byvar = group)
+
+pdf(file="Mortality_APvsCP_Compare_byVariable.pdf", width=9,height = 8) 
+forest.meta(metaprop_Mortality_byVar,layout =   "Revman", colgap.forest = "1.5 cm")
+dev.off()
+
+data_Mortality_Compare <- read_excel("~/Dropbox/R_Files_5/Rahgu and Pankaj Sir Metaanalysis/Revision_Pancreatology_Data_Import.xlsx", 
+     sheet = "Mortality_APvsCP")
+
+data_Mortality_Compare <-data_Mortality_Compare[order(data_Mortality_Compare$author),]
+
+data_Mortality_Compare
+
+data_Mortality_Compare<-data_Mortality_Compare[!is.na(data_Mortality_Compare$Mortality_AP_n)&!is.na(data_Mortality_Compare$Mortality_CP_n),]
+data_Mortality_Compare
+
+
+metaprop_Mortality_Compare<-metabin(event.e = data_Mortality_Compare$Mortality_AP_n,n.e = data_Mortality_Compare$TotalMortality_AP_N,event.c = data_Mortality_Compare$Mortality_CP_n,n.c = data_Mortality_Compare$TotalMortality_CP_N,studlab = author,data = data_Mortality_Compare,sm = "OR",comb.fixed = FALSE,label.e = "AP",label.c = "CP")
+  
+pdf(file="MortalityAPvsCP_Compare.pdf", width=10,height = 5) 
+forest.meta(metaprop_Mortality_Compare,layout =  "Revman")
+dev.off()
+```
+
+  
