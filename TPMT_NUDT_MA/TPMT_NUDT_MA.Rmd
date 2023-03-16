@@ -1,0 +1,134 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(readxl)
+library(meta)
+
+data_Import <-read_xlsx(path = "TPMT NUDT SR MA_04012021.xlsx",sheet = "Analysis")
+
+```
+
+```{r}
+source("metapropbyvarpdf.R")
+source("metapropreadybyvarpdf.R")
+source("metaproppdf.R")0.2
+source("metaRRORpdf.R")
+
+```
+
+```{r}
+colnames(data_Import)
+data_Import
+
+```
+
+```{r}
+metapropreadybyvarpdf(data = data_Import,year = "year",author = "author",event = "TPMT_n",total = "TPMT_N",byvar = "Group",method = "Inverse",studynameinbrief = "Pharmacogenomic",width = 12,height = 12)
+
+metaproppdf(data = data_Import,author = "author",year = "year",event = "NUDT_M_n",total = "NUDT_M_N",method = "Inverse",studynameinbrief = "Pharmacogenomic",width = 12,height = 12)
+
+metaproppdf(data = data_Import,author = "author",year = "year",event = "LEUK_TPMT_n",total = "LEUK_TPMT_N",method = "Inverse",studynameinbrief = "Pharmacogenomic",width = 12,height = 12)
+
+metaproppdf(data = data_Import,author = "author",year = "year",event = "LEUK_NUDT_n",total = "LEUK_NUDT_N",method = "Inverse",studynameinbrief = "Pharmacogenomic",width = 12,height = 12)
+
+```
+
+```{r}
+
+colnames(data_Import)
+
+data_TPMT_Prop <-data_Import[c("author","year","TPMT_n","TPMT_N")] 
+data_TPMT_Prop
+
+data_TPMT_Prop<-data_TPMT_Prop[order(data_TPMT_Prop$year),]
+data_TPMT_Prop<-data_TPMT_Prop[!is.na(data_TPMT_Prop$TPMT_n), ]
+
+data_TPMT_Prop$authoryear <-paste(data_TPMT_Prop$author,data_TPMT_Prop$year)
+
+metaprop_TPMT_Prop<-metaprop(event = data_TPMT_Prop$TPMT_n, n = data_TPMT_Prop$TPMT_N, data=data_TPMT_Prop, comb.random=TRUE, studlab=data_TPMT_Prop$authoryear,pscale = 100,comb.fixed = FALSE,method = "Inverse")
+
+pdf(file="TPMT_Prop.pdf", width=10,height = 8) 
+forest.meta(metaprop_TPMT_Prop,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,100))
+dev.off()
+
+library(meta)
+pdf(file="Funnel_TPMT_Prop.pdf", width=10,height = 8) 
+metafor::funnel(trimfill(metaprop_TPMT_Prop))
+dev.off()
+
+```
+
+
+```{r}
+data_NUDT_M_Prop <-data_Import[c("author","year","NUDT_M_n","NUDT_M_N")] 
+data_NUDT_M_Prop
+
+data_NUDT_M_Prop<-data_NUDT_M_Prop[order(data_NUDT_M_Prop$year),]
+data_NUDT_M_Prop<-data_NUDT_M_Prop[!is.na(data_NUDT_M_Prop$NUDT_M_n), ]
+
+data_NUDT_M_Prop$authoryear <-paste(data_NUDT_M_Prop$author,data_NUDT_M_Prop$year)
+
+metaprop_NUDT_M_Prop<-metaprop(event = data_NUDT_M_Prop$NUDT_M_n, n = data_NUDT_M_Prop$NUDT_M_N, data=data_NUDT_M_Prop, comb.random=TRUE, studlab=data_NUDT_M_Prop$authoryear,pscale = 100,comb.fixed = FALSE,method = "Inverse")
+
+pdf(file="NUDT_M_Prop.pdf", width=10,height = 8) 
+forest.meta(metaprop_NUDT_M_Prop,layout =   "Revman",colgap.forest = "0.5 cm",xlim=c(0,100))
+dev.off()
+
+library(meta)
+pdf(file="Funnel_NUDT_M_Prop.pdf", width=10,height = 8) 
+metafor::funnel(trimfill(metaprop_NUDT_M_Prop))
+dev.off()
+
+```
+
+
+
+```{r}
+metaRRORpdf(data = data_Import,author = "author",year = "year",event.e = "LEUK_TPMT_n",n.e = "LEUK_TPMT_N",
+          event.c = "NOLEUK_TPMT_n",n.c = "NOLEUK_TPMT_N",method = "Inverse",sm = "OR",studynameinbrief = "pharmacogenomic",width = 12,height = 12,label.e = "TPMT (M)",label.c = "TPMT (W)" )
+
+metaRRORpdf(data = data_Import,author = "author",year = "year",event.e = "LEUK_NUDT_n",n.e = "LEUK_NUDT_N",
+          event.c = "NOLEUK_NUDT_n",n.c = "NOLEUK_NUDT_N",method = "Inverse",sm = "OR",studynameinbrief = "pharmacogenomic",width = 12,height = 12,label.e = "TPMT (M)",label.c = "TPMT (W)")
+
+```
+
+
+```{r}
+library(readxl)
+Mutation_excel_21022021 <- read_excel("Mutation excel_21022021.xlsx")
+colnames(Mutation_excel_21022021)
+# View(Mutation_excel_21022021)   
+```
+
+# ```{r}
+# # library(reshape2)
+# # reshapeMutation <- melt(data = Mutation_excel_21022021,id.vars = c("Study","Year","N"),measure.vars = c("TPMT2",  "TPMT3A", "TPMT3B", "TPMT3C"))
+# # 
+# # reshapeMutation
+# 
+# ```
+
+# ```{r}
+# metapropreadybyvarpdf(data = reshapeMutation,year = "Year",author = "Study",event = "value",total = "N",byvar = "variable",method = "Inverse",studynameinbrief = "Pharmacogenomic_Mutation",width = 12,height = 20)
+# ```
+# ```{r}
+# write.csv(x = reshapeMutation,file = "reshapeMutation.csv")
+# ```
+# 
+
+```{r}
+metaproppdf(data = Mutation_excel_21022021,author = "author",year = "year",event = "TPMT_n",total = "TPMT_N",method = "Inverse",studynameinbrief = "Pharmacogenomic_Mutation",width = 12,height = 12)
+
+metaproppdf(data = Mutation_excel_21022021,author = "author",year = "year",event = "TPMT2_n",total = "TPMT_N",method = "Inverse",studynameinbrief = "Pharmacogenomic_Mutation",width = 12,height = 12)
+
+metaproppdf(data = Mutation_excel_21022021,author = "author",year = "year",event = "TPMT3A_n",total = "TPMT_N",method = "Inverse",studynameinbrief = "Pharmacogenomic_Mutation",width = 12,height = 12)
+
+metaproppdf(data = Mutation_excel_21022021,author = "author",year = "year",event = "TPMT3B_n",total = "TPMT_N",method = "Inverse",studynameinbrief = "Pharmacogenomic_Mutation",width = 12,height = 12)
+
+metaproppdf(data = Mutation_excel_21022021,author = "author",year = "year",event = "TPMT3C_n",total = "TPMT_N",method = "Inverse",studynameinbrief = "Pharmacogenomic_Mutation",width = 12,height = 12)
+```
+
