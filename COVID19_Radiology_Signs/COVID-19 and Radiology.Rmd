@@ -1,0 +1,633 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Importing libraries
+```{r}
+library(meta)
+library(mada)
+library(readxl)
+library(readxl)
+
+# For windows
+setwd("D:/Dropbox/R_Files_4/COVID-19 and Radiology/COVID-19 and Radiology")
+
+```
+
+#CT_GGO
+##Creation dataset
+```{r}
+data_CT_GGO_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_GGO.xlsx",
+sheet = "proportion")
+data_CT_GGO_proportion
+
+metaprop_CT_GGO_proportion<-metaprop(event = data_CT_GGO_proportion$n, n = data_CT_GGO_proportion$total, data=data_CT_GGO_proportion, comb.random=TRUE, studlab=data_CT_GGO_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="CT_GGO/CT_GGO_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_CT_GGO_proportion,layout = "JAMA")
+dev.off()
+```
+
+
+```{r}
+data_CT_GGO_diagnostic <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_GGO.xlsx",
+sheet = "diagnostic")
+data_CT_GGO_diagnostic
+data_CT_GGO_diagnostic$names<-data_CT_GGO_diagnostic$author
+
+```
+
+##Madad
+```{r}
+madaddata_CT_GGO_diagnostic<-madad(data_CT_GGO_diagnostic)
+capture.output(print(madaddata_CT_GGO_diagnostic,digits = 2),print("Result of CT_GGO_diagnostic"),file = "CT_GGO/madaddataCT_GGO_diagnostic.txt")
+
+modelfitdata_CT_GGO_diagnostic<-reitsma(data_CT_GGO_diagnostic)
+
+capture.output(print(summary(modelfitdata_CT_GGO_diagnostic),digits = 3),file = "CT_GGO/summarymodel_CT_GGO_diagnostic.txt")
+
+pdf(file="CT_GGO/sROC_plot_CT_GGO_diagnostic.pdf", width=12,height = 12)
+oldpar <- par(pty="s") 
+plot(modelfitdata_CT_GGO_diagnostic, predict=TRUE, cex=2)
+points(x = 1-madaddata_CT_GGO_diagnostic$spec$spec, y = madaddata_CT_GGO_diagnostic$sens$sens, pch=16)
+par(oldpar)
+dev.off()
+
+```
+
+
+##random effect
+```{r}
+data_CT_GGO_diagnostic
+
+data_CT_GGO_diagnostic$n1=data_CT_GGO_diagnostic$TP+data_CT_GGO_diagnostic$FN
+data_CT_GGO_diagnostic$n2=data_CT_GGO_diagnostic$FP+data_CT_GGO_diagnostic$TN
+
+metaprop_CT_GGO_diagnostic_sens=metaprop(event = TP, n = n1, data=data_CT_GGO_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_GGO_diagnostic$author,method = "Inverse")
+metaprop_CT_GGO_diagnostic_spec=metaprop(event = TN, n = n2, data=data_CT_GGO_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_GGO_diagnostic$author,method = "Inverse")
+
+metabin_CT_GGO_diagnostic_OR<-metabin(TP, n1, n2-TN,n2, data=data_CT_GGO_diagnostic, sm="OR",
+        comb.random=TRUE,
+         studlab=data_CT_GGO_diagnostic$author, method = "Inverse",
+         allstudies=TRUE)
+
+
+
+capture.output(paste(
+  paste(print("Random effect of sensitivity for CT_GGO_diagnostic"),
+  print(metaprop_CT_GGO_diagnostic_sens, digits = 2)),
+  paste(print("Random effect of specificity for CT_GGO_diagnostic"),
+  print(metaprop_CT_GGO_diagnostic_spec, digits = 2)),
+  paste(print("Random effect of Diag OR for CT_GGO_diagnostic"),
+  print(metabin_CT_GGO_diagnostic_OR, digits = 2))
+  ),
+  file = "CT_GGO/CT_GGO_diagnostic.sensitivity_specificity_DOR.txt"
+  )
+
+
+
+pdf(file="CT_GGO/Sensitivity_Plot_CT_GGO_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_GGO_diagnostic_sens,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_GGO/Specificity_Plot_CT_GGO_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_GGO_diagnostic_spec,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_GGO/Diagnostic_Odd_TB_CT_GGO_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metabin_CT_GGO_diagnostic_OR,layout = "JAMA")
+dev.off()
+
+```
+
+#CT_GGO_Consolidation
+##Creation dataset
+```{r}
+data_CT_GGO_Consolidation_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_GGO_Consolidation.xlsx",
+sheet = "proportion")
+data_CT_GGO_Consolidation_proportion
+
+metaprop_CT_GGO_Consolidation_proportion<-metaprop(event = data_CT_GGO_Consolidation_proportion$n, n = data_CT_GGO_Consolidation_proportion$total, data=data_CT_GGO_Consolidation_proportion, comb.random=TRUE, studlab=data_CT_GGO_Consolidation_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="CT_GGO_Consolidation/CT_GGO_Consolidation_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_CT_GGO_Consolidation_proportion,layout = "JAMA")
+dev.off()
+```
+
+
+```{r}
+data_CT_GGO_Consolidation_diagnostic <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_GGO_Consolidation.xlsx",
+sheet = "diagnostic")
+data_CT_GGO_Consolidation_diagnostic
+data_CT_GGO_Consolidation_diagnostic$names<-data_CT_GGO_Consolidation_diagnostic$author
+
+```
+
+##Madad
+```{r}
+madaddata_CT_GGO_Consolidation_diagnostic<-madad(data_CT_GGO_Consolidation_diagnostic)
+capture.output(print(madaddata_CT_GGO_Consolidation_diagnostic,digits = 2),print("Result of CT_GGO_Consolidation_diagnostic"),file = "CT_GGO_Consolidation/madaddataCT_GGO_Consolidation_diagnostic.txt")
+
+modelfitdata_CT_GGO_Consolidation_diagnostic<-reitsma(data_CT_GGO_Consolidation_diagnostic)
+
+capture.output(print(summary(modelfitdata_CT_GGO_Consolidation_diagnostic),digits = 3),file = "CT_GGO_Consolidation/summarymodel_CT_GGO_Consolidation_diagnostic.txt")
+
+pdf(file="CT_GGO_Consolidation/sROC_plot_CT_GGO_Consolidation_diagnostic.pdf", width=12,height = 12)
+oldpar <- par(pty="s") 
+plot(modelfitdata_CT_GGO_Consolidation_diagnostic, predict=TRUE, cex=2)
+points(x = 1-madaddata_CT_GGO_Consolidation_diagnostic$spec$spec, y = madaddata_CT_GGO_Consolidation_diagnostic$sens$sens, pch=16)
+par(oldpar)
+dev.off()
+
+```
+
+
+##random effect
+```{r}
+data_CT_GGO_Consolidation_diagnostic
+
+data_CT_GGO_Consolidation_diagnostic$n1=data_CT_GGO_Consolidation_diagnostic$TP+data_CT_GGO_Consolidation_diagnostic$FN
+data_CT_GGO_Consolidation_diagnostic$n2=data_CT_GGO_Consolidation_diagnostic$FP+data_CT_GGO_Consolidation_diagnostic$TN
+
+metaprop_CT_GGO_Consolidation_diagnostic_sens=metaprop(event = TP, n = n1, data=data_CT_GGO_Consolidation_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_GGO_Consolidation_diagnostic$author,method = "Inverse")
+metaprop_CT_GGO_Consolidation_diagnostic_spec=metaprop(event = TN, n = n2, data=data_CT_GGO_Consolidation_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_GGO_Consolidation_diagnostic$author,method = "Inverse")
+
+metabin_CT_GGO_Consolidation_diagnostic_OR<-metabin(TP, n1, n2-TN,n2, data=data_CT_GGO_Consolidation_diagnostic, sm="OR",
+        comb.random=TRUE,
+         studlab=data_CT_GGO_Consolidation_diagnostic$author, method = "Inverse",
+         allstudies=TRUE)
+
+
+
+capture.output(paste(
+  paste(print("Random effect of sensitivity for CT_GGO_Consolidation_diagnostic"),
+  print(metaprop_CT_GGO_Consolidation_diagnostic_sens, digits = 2)),
+  paste(print("Random effect of specificity for CT_GGO_Consolidation_diagnostic"),
+  print(metaprop_CT_GGO_Consolidation_diagnostic_spec, digits = 2)),
+  paste(print("Random effect of Diag OR for CT_GGO_Consolidation_diagnostic"),
+  print(metabin_CT_GGO_Consolidation_diagnostic_OR, digits = 2))
+  ),
+  file = "CT_GGO_Consolidation/CT_GGO_Consolidation_diagnostic.sensitivity_specificity_DOR.txt"
+  )
+
+
+
+pdf(file="CT_GGO_Consolidation/Sensitivity_Plot_CT_GGO_Consolidation_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_GGO_Consolidation_diagnostic_sens,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_GGO_Consolidation/Specificity_Plot_CT_GGO_Consolidation_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_GGO_Consolidation_diagnostic_spec,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_GGO_Consolidation/Diagnostic_Odd_TB_CT_GGO_Consolidation_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metabin_CT_GGO_Consolidation_diagnostic_OR,layout = "JAMA")
+dev.off()
+
+```
+
+
+
+
+
+#CT_Consolidation
+##Creation dataset
+```{r}
+data_CT_Consolidation_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Consolidation.xlsx",
+sheet = "proportion")
+data_CT_Consolidation_proportion
+
+metaprop_CT_Consolidation_proportion<-metaprop(event = data_CT_Consolidation_proportion$n, n = data_CT_Consolidation_proportion$total, data=data_CT_Consolidation_proportion, comb.random=TRUE, studlab=data_CT_Consolidation_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="CT_Consolidation/CT_Consolidation_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_CT_Consolidation_proportion,layout = "JAMA")
+dev.off()
+```
+
+
+```{r}
+data_CT_Consolidation_diagnostic <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Consolidation.xlsx",
+sheet = "diagnostic")
+data_CT_Consolidation_diagnostic
+data_CT_Consolidation_diagnostic$names<-data_CT_Consolidation_diagnostic$author
+
+```
+
+##Madad
+```{r}
+madaddata_CT_Consolidation_diagnostic<-madad(data_CT_Consolidation_diagnostic)
+capture.output(print(madaddata_CT_Consolidation_diagnostic,digits = 2),print("Result of CT_Consolidation_diagnostic"),file = "CT_Consolidation/madaddataCT_Consolidation_diagnostic.txt")
+
+modelfitdata_CT_Consolidation_diagnostic<-reitsma(data_CT_Consolidation_diagnostic)
+
+capture.output(print(summary(modelfitdata_CT_Consolidation_diagnostic),digits = 3),file = "CT_Consolidation/summarymodel_CT_Consolidation_diagnostic.txt")
+
+pdf(file="CT_Consolidation/sROC_plot_CT_Consolidation_diagnostic.pdf", width=12,height = 12)
+oldpar <- par(pty="s") 
+plot(modelfitdata_CT_Consolidation_diagnostic, predict=TRUE, cex=2)
+points(x = 1-madaddata_CT_Consolidation_diagnostic$spec$spec, y = madaddata_CT_Consolidation_diagnostic$sens$sens, pch=16)
+par(oldpar)
+dev.off()
+
+```
+
+
+##random effect
+```{r}
+data_CT_Consolidation_diagnostic
+
+data_CT_Consolidation_diagnostic$n1=data_CT_Consolidation_diagnostic$TP+data_CT_Consolidation_diagnostic$FN
+data_CT_Consolidation_diagnostic$n2=data_CT_Consolidation_diagnostic$FP+data_CT_Consolidation_diagnostic$TN
+
+metaprop_CT_Consolidation_diagnostic_sens=metaprop(event = TP, n = n1, data=data_CT_Consolidation_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_Consolidation_diagnostic$author,method = "Inverse")
+metaprop_CT_Consolidation_diagnostic_spec=metaprop(event = TN, n = n2, data=data_CT_Consolidation_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_Consolidation_diagnostic$author,method = "Inverse")
+
+metabin_CT_Consolidation_diagnostic_OR<-metabin(TP, n1, n2-TN,n2, data=data_CT_Consolidation_diagnostic, sm="OR",
+        comb.random=TRUE,
+         studlab=data_CT_Consolidation_diagnostic$author, method = "Inverse",
+         allstudies=TRUE)
+
+
+
+capture.output(paste(
+  paste(print("Random effect of sensitivity for CT_Consolidation_diagnostic"),
+  print(metaprop_CT_Consolidation_diagnostic_sens, digits = 2)),
+  paste(print("Random effect of specificity for CT_Consolidation_diagnostic"),
+  print(metaprop_CT_Consolidation_diagnostic_spec, digits = 2)),
+  paste(print("Random effect of Diag OR for CT_Consolidation_diagnostic"),
+  print(metabin_CT_Consolidation_diagnostic_OR, digits = 2))
+  ),
+  file = "CT_Consolidation/CT_Consolidation_diagnostic.sensitivity_specificity_DOR.txt"
+  )
+
+
+
+pdf(file="CT_Consolidation/Sensitivity_Plot_CT_Consolidation_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_Consolidation_diagnostic_sens,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_Consolidation/Specificity_Plot_CT_Consolidation_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_Consolidation_diagnostic_spec,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_Consolidation/Diagnostic_Odd_TB_CT_Consolidation_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metabin_CT_Consolidation_diagnostic_OR,layout = "JAMA")
+dev.off()
+
+```
+
+
+#CT_Crazy_Paving
+##Creation dataset
+```{r}
+data_CT_Crazy_Paving_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Crazy_Paving.xlsx",
+sheet = "proportion")
+data_CT_Crazy_Paving_proportion
+
+metaprop_CT_Crazy_Paving_proportion<-metaprop(event = data_CT_Crazy_Paving_proportion$n, n = data_CT_Crazy_Paving_proportion$total, data=data_CT_Crazy_Paving_proportion, comb.random=TRUE, studlab=data_CT_Crazy_Paving_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="CT_Crazy_Paving/CT_Crazy_Paving_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_CT_Crazy_Paving_proportion,layout = "JAMA")
+dev.off()
+```
+
+
+#CT_Halo_Sign
+##Creation dataset
+```{r}
+data_CT_Halo_Sign_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Halo_Sign.xlsx",
+sheet = "proportion")
+data_CT_Halo_Sign_proportion
+
+metaprop_CT_Halo_Sign_proportion<-metaprop(event = data_CT_Halo_Sign_proportion$n, n = data_CT_Halo_Sign_proportion$total, data=data_CT_Halo_Sign_proportion, comb.random=TRUE, studlab=data_CT_Halo_Sign_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="CT_Halo_Sign/CT_Halo_Sign_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_CT_Halo_Sign_proportion,layout = "JAMA")
+dev.off()
+```
+
+#CT_Lymphadenopathy
+##Creation dataset
+```{r}
+data_CT_Lymphadenopathy_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Lymphadenopathy.xlsx",
+sheet = "proportion")
+data_CT_Lymphadenopathy_proportion
+
+metaprop_CT_Lymphadenopathy_proportion<-metaprop(event = data_CT_Lymphadenopathy_proportion$n, n = data_CT_Lymphadenopathy_proportion$total, data=data_CT_Lymphadenopathy_proportion, comb.random=TRUE, studlab=data_CT_Lymphadenopathy_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="CT_Lymphadenopathy/CT_Lymphadenopathy_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_CT_Lymphadenopathy_proportion,layout = "JAMA")
+dev.off()
+```
+
+
+```{r}
+data_CT_Lymphadenopathy_diagnostic <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Lymphadenopathy.xlsx",
+sheet = "diagnostic")
+data_CT_Lymphadenopathy_diagnostic
+data_CT_Lymphadenopathy_diagnostic$names<-data_CT_Lymphadenopathy_diagnostic$author
+
+```
+
+##Madad
+```{r}
+madaddata_CT_Lymphadenopathy_diagnostic<-madad(data_CT_Lymphadenopathy_diagnostic)
+capture.output(print(madaddata_CT_Lymphadenopathy_diagnostic,digits = 2),print("Result of CT_Lymphadenopathy_diagnostic"),file = "CT_Lymphadenopathy/madaddataCT_Lymphadenopathy_diagnostic.txt")
+
+modelfitdata_CT_Lymphadenopathy_diagnostic<-reitsma(data_CT_Lymphadenopathy_diagnostic)
+
+capture.output(print(summary(modelfitdata_CT_Lymphadenopathy_diagnostic),digits = 3),file = "CT_Lymphadenopathy/summarymodel_CT_Lymphadenopathy_diagnostic.txt")
+
+pdf(file="CT_Lymphadenopathy/sROC_plot_CT_Lymphadenopathy_diagnostic.pdf", width=12,height = 12)
+oldpar <- par(pty="s") 
+plot(modelfitdata_CT_Lymphadenopathy_diagnostic, predict=TRUE, cex=2)
+points(x = 1-madaddata_CT_Lymphadenopathy_diagnostic$spec$spec, y = madaddata_CT_Lymphadenopathy_diagnostic$sens$sens, pch=16)
+par(oldpar)
+dev.off()
+
+```
+
+
+##random effect
+```{r}
+data_CT_Lymphadenopathy_diagnostic
+
+data_CT_Lymphadenopathy_diagnostic$n1=data_CT_Lymphadenopathy_diagnostic$TP+data_CT_Lymphadenopathy_diagnostic$FN
+data_CT_Lymphadenopathy_diagnostic$n2=data_CT_Lymphadenopathy_diagnostic$FP+data_CT_Lymphadenopathy_diagnostic$TN
+
+metaprop_CT_Lymphadenopathy_diagnostic_sens=metaprop(event = TP, n = n1, data=data_CT_Lymphadenopathy_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_Lymphadenopathy_diagnostic$author,method = "Inverse")
+metaprop_CT_Lymphadenopathy_diagnostic_spec=metaprop(event = TN, n = n2, data=data_CT_Lymphadenopathy_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_Lymphadenopathy_diagnostic$author,method = "Inverse")
+
+metabin_CT_Lymphadenopathy_diagnostic_OR<-metabin(TP, n1, n2-TN,n2, data=data_CT_Lymphadenopathy_diagnostic, sm="OR",
+        comb.random=TRUE,
+         studlab=data_CT_Lymphadenopathy_diagnostic$author, method = "Inverse",
+         allstudies=TRUE)
+
+
+
+capture.output(paste(
+  paste(print("Random effect of sensitivity for CT_Lymphadenopathy_diagnostic"),
+  print(metaprop_CT_Lymphadenopathy_diagnostic_sens, digits = 2)),
+  paste(print("Random effect of specificity for CT_Lymphadenopathy_diagnostic"),
+  print(metaprop_CT_Lymphadenopathy_diagnostic_spec, digits = 2)),
+  paste(print("Random effect of Diag OR for CT_Lymphadenopathy_diagnostic"),
+  print(metabin_CT_Lymphadenopathy_diagnostic_OR, digits = 2))
+  ),
+  file = "CT_Lymphadenopathy/CT_Lymphadenopathy_diagnostic.sensitivity_specificity_DOR.txt"
+  )
+
+
+
+pdf(file="CT_Lymphadenopathy/Sensitivity_Plot_CT_Lymphadenopathy_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_Lymphadenopathy_diagnostic_sens,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_Lymphadenopathy/Specificity_Plot_CT_Lymphadenopathy_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_Lymphadenopathy_diagnostic_spec,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_Lymphadenopathy/Diagnostic_Odd_TB_CT_Lymphadenopathy_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metabin_CT_Lymphadenopathy_diagnostic_OR,layout = "JAMA")
+dev.off()
+
+```
+
+#CT_Nodule
+##Creation dataset
+```{r}
+data_CT_Nodule_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Nodule.xlsx",
+sheet = "proportion")
+data_CT_Nodule_proportion
+
+metaprop_CT_Nodule_proportion<-metaprop(event = data_CT_Nodule_proportion$n, n = data_CT_Nodule_proportion$total, data=data_CT_Nodule_proportion, comb.random=TRUE, studlab=data_CT_Nodule_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="CT_Nodule/CT_Nodule_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_CT_Nodule_proportion,layout = "JAMA")
+dev.off()
+```
+
+
+```{r}
+data_CT_Nodule_diagnostic <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Nodule.xlsx",
+sheet = "diagnostic")
+data_CT_Nodule_diagnostic
+data_CT_Nodule_diagnostic$names<-data_CT_Nodule_diagnostic$author
+
+```
+
+##Madad
+```{r}
+madaddata_CT_Nodule_diagnostic<-madad(data_CT_Nodule_diagnostic)
+capture.output(print(madaddata_CT_Nodule_diagnostic,digits = 2),print("Result of CT_Nodule_diagnostic"),file = "CT_Nodule/madaddataCT_Nodule_diagnostic.txt")
+
+modelfitdata_CT_Nodule_diagnostic<-reitsma(data_CT_Nodule_diagnostic)
+
+capture.output(print(summary(modelfitdata_CT_Nodule_diagnostic),digits = 3),file = "CT_Nodule/summarymodel_CT_Nodule_diagnostic.txt")
+
+pdf(file="CT_Nodule/sROC_plot_CT_Nodule_diagnostic.pdf", width=12,height = 12)
+oldpar <- par(pty="s") 
+plot(modelfitdata_CT_Nodule_diagnostic, predict=TRUE, cex=2)
+points(x = 1-madaddata_CT_Nodule_diagnostic$spec$spec, y = madaddata_CT_Nodule_diagnostic$sens$sens, pch=16)
+par(oldpar)
+dev.off()
+
+```
+
+
+##random effect
+```{r}
+data_CT_Nodule_diagnostic
+
+data_CT_Nodule_diagnostic$n1=data_CT_Nodule_diagnostic$TP+data_CT_Nodule_diagnostic$FN
+data_CT_Nodule_diagnostic$n2=data_CT_Nodule_diagnostic$FP+data_CT_Nodule_diagnostic$TN
+
+metaprop_CT_Nodule_diagnostic_sens=metaprop(event = TP, n = n1, data=data_CT_Nodule_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_Nodule_diagnostic$author,method = "Inverse")
+metaprop_CT_Nodule_diagnostic_spec=metaprop(event = TN, n = n2, data=data_CT_Nodule_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_Nodule_diagnostic$author,method = "Inverse")
+
+metabin_CT_Nodule_diagnostic_OR<-metabin(TP, n1, n2-TN,n2, data=data_CT_Nodule_diagnostic, sm="OR",
+        comb.random=TRUE,
+         studlab=data_CT_Nodule_diagnostic$author, method = "Inverse",
+         allstudies=TRUE)
+
+
+
+capture.output(paste(
+  paste(print("Random effect of sensitivity for CT_Nodule_diagnostic"),
+  print(metaprop_CT_Nodule_diagnostic_sens, digits = 2)),
+  paste(print("Random effect of specificity for CT_Nodule_diagnostic"),
+  print(metaprop_CT_Nodule_diagnostic_spec, digits = 2)),
+  paste(print("Random effect of Diag OR for CT_Nodule_diagnostic"),
+  print(metabin_CT_Nodule_diagnostic_OR, digits = 2))
+  ),
+  file = "CT_Nodule/CT_Nodule_diagnostic.sensitivity_specificity_DOR.txt"
+  )
+
+
+
+pdf(file="CT_Nodule/Sensitivity_Plot_CT_Nodule_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_Nodule_diagnostic_sens,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_Nodule/Specificity_Plot_CT_Nodule_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_Nodule_diagnostic_spec,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_Nodule/Diagnostic_Odd_TB_CT_Nodule_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metabin_CT_Nodule_diagnostic_OR,layout = "JAMA")
+dev.off()
+
+```
+
+
+#CT_Pleural_Effusion
+##Creation dataset
+```{r}
+data_CT_Pleural_Effusion_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Pleural_Effusion.xlsx",
+sheet = "proportion")
+data_CT_Pleural_Effusion_proportion
+
+metaprop_CT_Pleural_Effusion_proportion<-metaprop(event = data_CT_Pleural_Effusion_proportion$n, n = data_CT_Pleural_Effusion_proportion$total, data=data_CT_Pleural_Effusion_proportion, comb.random=TRUE, studlab=data_CT_Pleural_Effusion_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="CT_Pleural_Effusion/CT_Pleural_Effusion_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_CT_Pleural_Effusion_proportion,layout = "JAMA")
+dev.off()
+```
+
+
+```{r}
+data_CT_Pleural_Effusion_diagnostic <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_CT_Pleural_Effusion.xlsx",
+sheet = "diagnostic")
+data_CT_Pleural_Effusion_diagnostic
+data_CT_Pleural_Effusion_diagnostic$names<-data_CT_Pleural_Effusion_diagnostic$author
+
+```
+
+##Madad
+```{r}
+madaddata_CT_Pleural_Effusion_diagnostic<-madad(data_CT_Pleural_Effusion_diagnostic)
+capture.output(print(madaddata_CT_Pleural_Effusion_diagnostic,digits = 2),print("Result of CT_Pleural_Effusion_diagnostic"),file = "CT_Pleural_Effusion/madaddataCT_Pleural_Effusion_diagnostic.txt")
+
+modelfitdata_CT_Pleural_Effusion_diagnostic<-reitsma(data_CT_Pleural_Effusion_diagnostic)
+
+capture.output(print(summary(modelfitdata_CT_Pleural_Effusion_diagnostic),digits = 3),file = "CT_Pleural_Effusion/summarymodel_CT_Pleural_Effusion_diagnostic.txt")
+
+pdf(file="CT_Pleural_Effusion/sROC_plot_CT_Pleural_Effusion_diagnostic.pdf", width=12,height = 12)
+oldpar <- par(pty="s") 
+plot(modelfitdata_CT_Pleural_Effusion_diagnostic, predict=TRUE, cex=2)
+points(x = 1-madaddata_CT_Pleural_Effusion_diagnostic$spec$spec, y = madaddata_CT_Pleural_Effusion_diagnostic$sens$sens, pch=16)
+par(oldpar)
+dev.off()
+
+```
+
+
+##random effect
+```{r}
+data_CT_Pleural_Effusion_diagnostic
+
+data_CT_Pleural_Effusion_diagnostic$n1=data_CT_Pleural_Effusion_diagnostic$TP+data_CT_Pleural_Effusion_diagnostic$FN
+data_CT_Pleural_Effusion_diagnostic$n2=data_CT_Pleural_Effusion_diagnostic$FP+data_CT_Pleural_Effusion_diagnostic$TN
+
+metaprop_CT_Pleural_Effusion_diagnostic_sens=metaprop(event = TP, n = n1, data=data_CT_Pleural_Effusion_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_Pleural_Effusion_diagnostic$author,method = "Inverse")
+metaprop_CT_Pleural_Effusion_diagnostic_spec=metaprop(event = TN, n = n2, data=data_CT_Pleural_Effusion_diagnostic,
+        comb.random=TRUE,
+         studlab=data_CT_Pleural_Effusion_diagnostic$author,method = "Inverse")
+
+metabin_CT_Pleural_Effusion_diagnostic_OR<-metabin(TP, n1, n2-TN,n2, data=data_CT_Pleural_Effusion_diagnostic, sm="OR",
+        comb.random=TRUE,
+         studlab=data_CT_Pleural_Effusion_diagnostic$author, method = "Inverse",
+         allstudies=TRUE)
+
+
+
+capture.output(paste(
+  paste(print("Random effect of sensitivity for CT_Pleural_Effusion_diagnostic"),
+  print(metaprop_CT_Pleural_Effusion_diagnostic_sens, digits = 2)),
+  paste(print("Random effect of specificity for CT_Pleural_Effusion_diagnostic"),
+  print(metaprop_CT_Pleural_Effusion_diagnostic_spec, digits = 2)),
+  paste(print("Random effect of Diag OR for CT_Pleural_Effusion_diagnostic"),
+  print(metabin_CT_Pleural_Effusion_diagnostic_OR, digits = 2))
+  ),
+  file = "CT_Pleural_Effusion/CT_Pleural_Effusion_diagnostic.sensitivity_specificity_DOR.txt"
+  )
+
+
+
+pdf(file="CT_Pleural_Effusion/Sensitivity_Plot_CT_Pleural_Effusion_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_Pleural_Effusion_diagnostic_sens,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_Pleural_Effusion/Specificity_Plot_CT_Pleural_Effusion_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metaprop_CT_Pleural_Effusion_diagnostic_spec,layout = "JAMA")
+dev.off()
+
+
+pdf(file="CT_Pleural_Effusion/Diagnostic_Odd_TB_CT_Pleural_Effusion_diagnostic.pdf", width=12,height = 12) 
+forest.meta(metabin_CT_Pleural_Effusion_diagnostic_OR,layout = "JAMA")
+dev.off()
+
+```
+
+#Xray_Consolidation
+##Creation dataset
+```{r}
+data_Xray_Consolidation_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_Xray_Consolidation.xlsx",
+sheet = "proportion")
+data_Xray_Consolidation_proportion
+
+metaprop_Xray_Consolidation_proportion<-metaprop(event = data_Xray_Consolidation_proportion$n, n = data_Xray_Consolidation_proportion$total, data=data_Xray_Consolidation_proportion, comb.random=TRUE, studlab=data_Xray_Consolidation_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="Xray_Consolidation/Xray_Consolidation_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_Xray_Consolidation_proportion,layout = "JAMA")
+dev.off()
+```
+
+
+#Xray_GGO
+##Creation dataset
+```{r}
+data_Xray_GGO_proportion <- read_excel("D:/Dropbox/R_Files_4/COVID-19 and Radiology/Consensus_Xray_GGO.xlsx",
+sheet = "proportion")
+data_Xray_GGO_proportion
+
+metaprop_Xray_GGO_proportion<-metaprop(event = data_Xray_GGO_proportion$n, n = data_Xray_GGO_proportion$total, data=data_Xray_GGO_proportion, comb.random=TRUE, studlab=data_Xray_GGO_proportion$author,pscale = 100,method = "Inverse")
+
+pdf(file="Xray_GGO/Xray_GGO_proportion.pdf", width=8,height = 12) 
+forest.meta(metaprop_Xray_GGO_proportion,layout = "JAMA")
+dev.off()
+```
+
