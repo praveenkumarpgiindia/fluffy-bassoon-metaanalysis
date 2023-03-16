@@ -1,0 +1,1187 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Importing libraries
+```{r}
+library(meta)
+library(mada)
+library(readxl)
+library(readxl)
+
+# For windows
+setwd("/Users/praveenkumarm/Dropbox/R_Files_4/COVID-19 and Hepatic Manifestation/")
+
+```
+
+```{r}
+savename<-readxl::excel_sheets("/Users/praveenkumarm/Dropbox/R_Files_4/COVID-19 and Hepatic Manifestation/Final Format COVID-19 and Hepatology Analysis.xlsx")
+savename
+```
+
+
+#SGPT
+```{r}
+data_SGPT_Categorical_Overall <- read_xlsx("/Users/praveenkumarm/Dropbox/R_Files_4/COVID-19 and Hepatic Manifestation/Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGPT_Categorical_Overall")
+
+data_SGPT_Categorical_Overall<-data_SGPT_Categorical_Overall[order(data_SGPT_Categorical_Overall$author),]
+
+metaprop_SGPT_Categorical_Overall<-metaprop(event = data_SGPT_Categorical_Overall$n, n = data_SGPT_Categorical_Overall$N, data=data_SGPT_Categorical_Overall, comb.random=TRUE, studlab=data_SGPT_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+metaprop_SGPT_Categorical_Overall
+
+pdf(file="SGPT/SGPT_Categorical_Overall.pdf", width=8,height = 20) 
+forest.meta(metaprop_SGPT_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_SGPT_Categorical_Compare <- read_xlsx("/Users/praveenkumarm/Dropbox/R_Files_4/COVID-19 and Hepatic Manifestation/Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGPT_Categorical_Compare")
+data_SGPT_Categorical_Compare
+
+data_SGPT_Categorical_Compare <-data_SGPT_Categorical_Compare[order(data_SGPT_Categorical_Compare$author),]
+
+
+
+data_SGPT_Categorical_Compare_byVar_severe<-data_SGPT_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_SGPT_Categorical_Compare_byVar_severe<-data_SGPT_Categorical_Compare_byVar_severe[!is.na(data_SGPT_Categorical_Compare_byVar_severe$n1_severe), ]
+data_SGPT_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_SGPT_Categorical_Compare_byVar_severe)
+colnames(data_SGPT_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_SGPT_Categorical_Compare_byVar_nonsevere<-data_SGPT_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_SGPT_Categorical_Compare_byVar_nonsevere<-data_SGPT_Categorical_Compare_byVar_nonsevere[!is.na(data_SGPT_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_SGPT_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_SGPT_Categorical_Compare_byVar_nonsevere)
+colnames(data_SGPT_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_SGPT_Categorical_Compare_byVar<-rbind(data_SGPT_Categorical_Compare_byVar_severe,data_SGPT_Categorical_Compare_byVar_nonsevere)
+
+data_SGPT_Categorical_Compare_byVar<-data.frame(data_SGPT_Categorical_Compare_byVar)
+metaprop_SGPT_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_SGPT_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="SGPT/SGPT_Categorical_Compare_byVariable.pdf", width=8,height = 20) 
+forest.meta(
+metaprop_SGPT_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "1.5 cm")
+dev.off()
+
+data_SGPT_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGPT_Categorical_Compare")
+
+data_SGPT_Categorical_Compare <-data_SGPT_Categorical_Compare[order(data_SGPT_Categorical_Compare$author),]
+
+data_SGPT_Categorical_Compare
+
+data_SGPT_Categorical_Compare<-data_SGPT_Categorical_Compare[!is.na(data_SGPT_Categorical_Compare$n1_severe)&!is.na(data_SGPT_Categorical_Compare$n2_nonsevere),]
+data_SGPT_Categorical_Compare
+
+
+help("metabin")
+metaprop_SGPT_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_SGPT_Categorical_Compare,method = "Inverse",sm = "RR")
+
+pdf(file="SGPT/SGPT_Categorical_Compare.pdf", width=8,height = 20) 
+forest.meta(metaprop_SGPT_Categorical_Compare,layout =  "JAMA")
+dev.off()
+
+
+
+data_SGPT_Categorical_Compare_COVIDvsNonCOVID<-  read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGPT_Categorical_Compare_2")
+colnames(data_SGPT_Categorical_Compare_COVIDvsNonCOVID)
+
+data_SGPT_Categorical_Compare_COVIDvsNonCOVID<-data_SGPT_Categorical_Compare_COVIDvsNonCOVID[order(data_SGPT_Categorical_Compare_COVIDvsNonCOVID$author),]
+
+metaprop_SGPT_Categorical_Compare_COVIDvsNonCOVID<-metabin(event.e = n1_COVID_19,n.e = N1_COVID_19,event.c = n2_nonCOVID_19,n.c = N2_nonCOVID_19,studlab = author,data = data_SGPT_Categorical_Compare_COVIDvsNonCOVID,method = "Inverse",sm = "RR")
+  
+pdf(file="SGPT/SGPT_Categorical_Compare_COVIDvsNonCOVID.pdf", width=8,height = 12) 
+forest.meta(metaprop_SGPT_Categorical_Compare_COVIDvsNonCOVID,layout =   "JAMA")
+dev.off()
+
+
+
+data_SGPT_Continuous_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGPT_Continuous_Compare")
+
+data_SGPT_Continuous_Compare <-data_SGPT_Continuous_Compare[order(data_SGPT_Continuous_Compare$author),]
+
+data_SGPT_Continuous_Compare
+
+help("metabin")
+metacont_SGPT_Continuous_Compare<-metacont(n.e = N1_severe,mean.e = Mean1_severe,sd.e = SD1_severe,n.c = N2_nonsevere,mean.c = Mean2_nonsevere,sd.c = SD2_nonsevere,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_SGPT_Continuous_Compare)
+
+pdf(file="SGPT/SGPT_Continuous_Compare.pdf", width=8,height = 20) 
+forest.meta(metacont_SGPT_Continuous_Compare,layout =   "JAMA")
+dev.off()
+
+
+data_SGPT_Continuous_Compare_COVIDvsNonCOVID <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGPT_Continuous_Compare_2")
+
+data_SGPT_Continuous_Compare_COVIDvsNonCOVID <-data_SGPT_Continuous_Compare_COVIDvsNonCOVID[order(data_SGPT_Continuous_Compare_COVIDvsNonCOVID$author),]
+
+data_SGPT_Continuous_Compare_COVIDvsNonCOVID
+
+help("metabin")
+metacont_SGPT_Continuous_Compare_COVIDvsNonCOVID<-metacont(n.e = N1_COVID_19,mean.e = Mean1_COVID_19,sd.e = SD1_COVID_19,n.c = N2_nonCOVID_19,mean.c = Mean2_nonCOVID_19,sd.c = SD2_nonCOVID_19,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_SGPT_Continuous_Compare_COVIDvsNonCOVID)
+
+pdf(file="SGPT/SGPT_Continuous_Compare_COVIDvsNonCOVID.pdf", width=8,height = 12) 
+forest.meta(metacont_SGPT_Continuous_Compare_COVIDvsNonCOVID,layout =   "JAMA")
+dev.off()
+
+
+```
+
+
+
+#SGOT
+```{r}
+data_SGOT_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGOT_Categorical_Overall")
+
+data_SGOT_Categorical_Overall<-data_SGOT_Categorical_Overall[order(data_SGOT_Categorical_Overall$author),]
+
+
+metaprop_SGOT_Categorical_Overall<-metaprop(event = data_SGOT_Categorical_Overall$n, n = data_SGOT_Categorical_Overall$N, data=data_SGOT_Categorical_Overall, comb.random=TRUE, studlab=data_SGOT_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="SGOT/SGOT_Categorical_Overall.pdf", width=8,height = 20) 
+forest.meta(metaprop_SGOT_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_SGOT_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGOT_Categorical_Compare")
+data_SGOT_Categorical_Compare
+
+data_SGOT_Categorical_Compare <-data_SGOT_Categorical_Compare[order(data_SGOT_Categorical_Compare$author),]
+
+
+
+data_SGOT_Categorical_Compare_byVar_severe<-data_SGOT_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_SGOT_Categorical_Compare_byVar_severe<-data_SGOT_Categorical_Compare_byVar_severe[!is.na(data_SGOT_Categorical_Compare_byVar_severe$n1_severe), ]
+data_SGOT_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_SGOT_Categorical_Compare_byVar_severe)
+colnames(data_SGOT_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_SGOT_Categorical_Compare_byVar_nonsevere<-data_SGOT_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_SGOT_Categorical_Compare_byVar_nonsevere<-data_SGOT_Categorical_Compare_byVar_nonsevere[!is.na(data_SGOT_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_SGOT_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_SGOT_Categorical_Compare_byVar_nonsevere)
+colnames(data_SGOT_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_SGOT_Categorical_Compare_byVar<-rbind(data_SGOT_Categorical_Compare_byVar_severe,data_SGOT_Categorical_Compare_byVar_nonsevere)
+
+data_SGOT_Categorical_Compare_byVar<-data.frame(data_SGOT_Categorical_Compare_byVar)
+metaprop_SGOT_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_SGOT_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="SGOT/SGOT_Categorical_Compare_byVariable.pdf", width=8,height = 20) 
+forest.meta(
+metaprop_SGOT_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "1.5 cm")
+dev.off()
+
+data_SGOT_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGOT_Categorical_Compare")
+
+data_SGOT_Categorical_Compare <-data_SGOT_Categorical_Compare[order(data_SGOT_Categorical_Compare$author),]
+
+data_SGOT_Categorical_Compare
+data_SGOT_Categorical_Compare
+
+data_SGOT_Categorical_Compare<-data_SGOT_Categorical_Compare[!is.na(data_SGOT_Categorical_Compare$n1_severe)&!is.na(data_SGOT_Categorical_Compare$n2_nonsevere),]
+data_SGOT_Categorical_Compare
+
+help("metabin")
+metaprop_SGOT_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_SGOT_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="SGOT/SGOT_Categorical_Compare.pdf", width=8,height = 20) 
+forest.meta(metaprop_SGOT_Categorical_Compare,layout =   "JAMA")
+dev.off()
+
+
+
+data_SGOT_Categorical_Compare_COVIDvsNonCOVID<-  read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGOT_Categorical_Compare_2")
+colnames(data_SGOT_Categorical_Compare_COVIDvsNonCOVID)
+
+data_SGOT_Categorical_Compare_COVIDvsNonCOVID<-data_SGOT_Categorical_Compare_COVIDvsNonCOVID[order(data_SGOT_Categorical_Compare_COVIDvsNonCOVID$author),]
+
+
+metaprop_SGOT_Categorical_Compare_COVIDvsNonCOVID<-metabin(event.e = n1_COVID_19,n.e = N1_COVID_19,event.c = n2_nonCOVID_19,n.c = N2_nonCOVID_19,studlab = author,data = data_SGOT_Categorical_Compare_COVIDvsNonCOVID,method = "Inverse",sm = "RR")
+  
+pdf(file="SGOT/SGOT_Categorical_Compare_COVIDvsNonCOVID.pdf", width=8,height = 12) 
+forest.meta(metaprop_SGOT_Categorical_Compare_COVIDvsNonCOVID,layout =   "JAMA")
+dev.off()
+
+data_SGOT_Continuous_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGOT_Continuous_Compare")
+
+data_SGOT_Continuous_Compare <-data_SGOT_Continuous_Compare[order(data_SGOT_Continuous_Compare$author),]
+
+data_SGOT_Continuous_Compare
+
+help("metabin")
+metacont_SGOT_Continuous_Compare<-metacont(n.e = N1_severe,mean.e = Mean1_severe,sd.e = SD1_severe,n.c = N2_nonsevere,mean.c = Mean2_nonsevere,sd.c = SD2_nonsevere,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_SGOT_Continuous_Compare)
+
+pdf(file="SGOT/SGOT_Continuous_Compare.pdf", width=8,height = 20) 
+forest.meta(metacont_SGOT_Continuous_Compare,layout =   "JAMA")
+dev.off()
+
+
+data_SGOT_Continuous_Compare_COVIDvsNonCOVID <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "SGOT_Continuous_Compare_2")
+
+data_SGOT_Continuous_Compare_COVIDvsNonCOVID <-data_SGOT_Continuous_Compare_COVIDvsNonCOVID[order(data_SGOT_Continuous_Compare_COVIDvsNonCOVID$author),]
+
+data_SGOT_Continuous_Compare_COVIDvsNonCOVID
+
+help("metabin")
+metacont_SGOT_Continuous_Compare_COVIDvsNonCOVID<-metacont(n.e = N1_COVID_19,mean.e = Mean1_COVID_19,sd.e = SD1_COVID_19,n.c = N2_nonCOVID_19,mean.c = Mean2_nonCOVID_19,sd.c = SD2_nonCOVID_19,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_SGOT_Continuous_Compare_COVIDvsNonCOVID)
+
+pdf(file="SGOT/SGOT_Continuous_Compare_COVIDvsNonCOVID.pdf", width=8,height = 12) 
+forest.meta(metacont_SGOT_Continuous_Compare_COVIDvsNonCOVID,layout =   "JAMA")
+dev.off()
+
+
+```
+
+#ALP
+```{r}
+data_ALP_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "ALP_Categorical_Overall")
+
+data_ALP_Categorical_Overall<-data_ALP_Categorical_Overall[order(data_ALP_Categorical_Overall$author),]
+
+
+metaprop_ALP_Categorical_Overall<-metaprop(event = data_ALP_Categorical_Overall$n, n = data_ALP_Categorical_Overall$N, data=data_ALP_Categorical_Overall, comb.random=TRUE, studlab=data_ALP_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="ALP/ALP_Categorical_Overall.pdf", width=8,height = 12) 
+forest.meta(metaprop_ALP_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_ALP_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "ALP_Categorical_Compare")
+data_ALP_Categorical_Compare
+data_ALP_Categorical_Compare <-data_ALP_Categorical_Compare[order(data_ALP_Categorical_Compare$author),]
+
+
+
+
+data_ALP_Categorical_Compare_byVar_severe<-data_ALP_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_ALP_Categorical_Compare_byVar_severe<-data_ALP_Categorical_Compare_byVar_severe[!is.na(data_ALP_Categorical_Compare_byVar_severe$n1_severe), ]
+data_ALP_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_ALP_Categorical_Compare_byVar_severe)
+colnames(data_ALP_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_ALP_Categorical_Compare_byVar_nonsevere<-data_ALP_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_ALP_Categorical_Compare_byVar_nonsevere<-data_ALP_Categorical_Compare_byVar_nonsevere[!is.na(data_ALP_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_ALP_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_ALP_Categorical_Compare_byVar_nonsevere)
+colnames(data_ALP_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_ALP_Categorical_Compare_byVar<-rbind(data_ALP_Categorical_Compare_byVar_severe,data_ALP_Categorical_Compare_byVar_nonsevere)
+
+data_ALP_Categorical_Compare_byVar<-data.frame(data_ALP_Categorical_Compare_byVar)
+metaprop_ALP_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_ALP_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="ALP/ALP_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+forest.meta(
+metaprop_ALP_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "2 cm")
+dev.off()
+
+data_ALP_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "ALP_Categorical_Compare")
+
+data_ALP_Categorical_Compare <-data_ALP_Categorical_Compare[order(data_ALP_Categorical_Compare$author),]
+
+data_ALP_Categorical_Compare
+
+data_ALP_Categorical_Compare
+
+data_ALP_Categorical_Compare<-data_ALP_Categorical_Compare[!is.na(data_ALP_Categorical_Compare$n1_severe)&!is.na(data_ALP_Categorical_Compare$n2_nonsevere),]
+data_ALP_Categorical_Compare
+
+help("metabin")
+metaprop_ALP_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_ALP_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="ALP/ALP_Categorical_Compare.pdf", width=8,height = 12) 
+forest.meta(metaprop_ALP_Categorical_Compare,layout =   "JAMA")
+dev.off()
+
+
+
+data_ALP_Continuous_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "ALP_Continuous_Compare")
+
+data_ALP_Continuous_Compare <-data_ALP_Continuous_Compare[order(data_ALP_Continuous_Compare$author),]
+
+data_ALP_Continuous_Compare
+
+help("metabin")
+metacont_ALP_Continuous_Compare<-metacont(n.e = N1_severe,mean.e = Mean1_severe,sd.e = SD1_severe,n.c = N2_nonsevere,mean.c = Mean2_nonsevere,sd.c = SD2_nonsevere,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_ALP_Continuous_Compare)
+
+pdf(file="ALP/ALP_Continuous_Compare.pdf", width=8,height = 12) 
+forest.meta(metacont_ALP_Continuous_Compare,layout =   "JAMA")
+dev.off()
+
+```
+
+#GGT
+```{r}
+data_GGT_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "GGT_Categorical_Overall")
+
+data_GGT_Categorical_Overall<-data_GGT_Categorical_Overall[order(data_GGT_Categorical_Overall$author),]
+
+
+metaprop_GGT_Categorical_Overall<-metaprop(event = data_GGT_Categorical_Overall$n, n = data_GGT_Categorical_Overall$N, data=data_GGT_Categorical_Overall, comb.random=TRUE, studlab=data_GGT_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="GGT/GGT_Categorical_Overall.pdf", width=8,height = 12) 
+forest.meta(metaprop_GGT_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_GGT_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "GGT_Categorical_Compare")
+data_GGT_Categorical_Compare
+
+data_GGT_Categorical_Compare <-data_GGT_Categorical_Compare[order(data_GGT_Categorical_Compare$author),]
+
+
+data_GGT_Categorical_Compare_byVar_severe<-data_GGT_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_GGT_Categorical_Compare_byVar_severe<-data_GGT_Categorical_Compare_byVar_severe[!is.na(data_GGT_Categorical_Compare_byVar_severe$n1_severe), ]
+data_GGT_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_GGT_Categorical_Compare_byVar_severe)
+colnames(data_GGT_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_GGT_Categorical_Compare_byVar_nonsevere<-data_GGT_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_GGT_Categorical_Compare_byVar_nonsevere<-data_GGT_Categorical_Compare_byVar_nonsevere[!is.na(data_GGT_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_GGT_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_GGT_Categorical_Compare_byVar_nonsevere)
+colnames(data_GGT_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_GGT_Categorical_Compare_byVar<-rbind(data_GGT_Categorical_Compare_byVar_severe,data_GGT_Categorical_Compare_byVar_nonsevere)
+
+data_GGT_Categorical_Compare_byVar<-data.frame(data_GGT_Categorical_Compare_byVar)
+metaprop_GGT_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_GGT_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="GGT/GGT_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+forest.meta(
+metaprop_GGT_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "1.2 cm")
+dev.off()
+
+data_GGT_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "GGT_Categorical_Compare")
+
+data_GGT_Categorical_Compare <-data_GGT_Categorical_Compare[order(data_GGT_Categorical_Compare$author),]
+
+data_GGT_Categorical_Compare
+
+data_GGT_Categorical_Compare
+
+data_GGT_Categorical_Compare<-data_GGT_Categorical_Compare[!is.na(data_GGT_Categorical_Compare$n1_severe)&!is.na(data_GGT_Categorical_Compare$n2_nonsevere),]
+data_GGT_Categorical_Compare
+
+help("metabin")
+metaprop_GGT_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_GGT_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="GGT/GGT_Categorical_Compare.pdf", width=8,height = 12) 
+forest.meta(metaprop_GGT_Categorical_Compare,layout =   "JAMA")
+dev.off()
+
+
+
+data_GGT_Continuous_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "GGT_Continuous_Compare")
+
+data_GGT_Continuous_Compare <-data_GGT_Continuous_Compare[order(data_GGT_Continuous_Compare$author),]
+
+data_GGT_Continuous_Compare
+
+help("metabin")
+metacont_GGT_Continuous_Compare<-metacont(n.e = N1_severe,mean.e = Mean1_severe,sd.e = SD1_severe,n.c = N2_nonsevere,mean.c = Mean2_nonsevere,sd.c = SD2_nonsevere,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_GGT_Continuous_Compare)
+
+pdf(file="GGT/GGT_Continuous_Compare.pdf", width=8,height = 12) 
+forest.meta(metacont_GGT_Continuous_Compare,layout =   "JAMA")
+dev.off()
+
+
+
+data_GGT_Continuous_Compare_COVIDvsNonCOVID <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "GGT_Continuous_Compare_2")
+
+data_GGT_Continuous_Compare_COVIDvsNonCOVID <-data_GGT_Continuous_Compare_COVIDvsNonCOVID[order(data_GGT_Continuous_Compare_COVIDvsNonCOVID$author),]
+
+data_GGT_Continuous_Compare_COVIDvsNonCOVID
+
+help("metabin")
+metacont_GGT_Continuous_Compare_COVIDvsNonCOVID<-metacont(n.e = N1_COVID_19,mean.e = Mean1_COVID_19,sd.e = SD1_COVID_19,n.c = N2_nonCOVID_19,mean.c = Mean2_nonCOVID_19,sd.c = SD2_nonCOVID_19,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_GGT_Continuous_Compare_COVIDvsNonCOVID)
+
+pdf(file="GGT/GGT_Continuous_Compare_COVIDvsNonCOVID.pdf", width=8,height = 12) 
+forest.meta(metacont_GGT_Continuous_Compare_COVIDvsNonCOVID,layout =   "JAMA")
+dev.off()
+
+```
+
+#Albumin
+```{r}
+data_Albumin_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Albumin_Categorical_Overall")
+
+data_Albumin_Categorical_Overall<-data_Albumin_Categorical_Overall[order(data_Albumin_Categorical_Overall$author),]
+
+
+metaprop_Albumin_Categorical_Overall<-metaprop(event = data_Albumin_Categorical_Overall$n, n = data_Albumin_Categorical_Overall$N, data=data_Albumin_Categorical_Overall, comb.random=TRUE, studlab=data_Albumin_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="Albumin/Albumin_Categorical_Overall.pdf", width=8,height = 14) 
+forest.meta(metaprop_Albumin_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_Albumin_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Albumin_Categorical_Compare")
+data_Albumin_Categorical_Compare
+
+data_Albumin_Categorical_Compare <-data_Albumin_Categorical_Compare[order(data_Albumin_Categorical_Compare$author),]
+
+
+data_Albumin_Categorical_Compare_byVar_severe<-data_Albumin_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_Albumin_Categorical_Compare_byVar_severe<-data_Albumin_Categorical_Compare_byVar_severe[!is.na(data_Albumin_Categorical_Compare_byVar_severe$n1_severe), ]
+data_Albumin_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_Albumin_Categorical_Compare_byVar_severe)
+colnames(data_Albumin_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_Albumin_Categorical_Compare_byVar_nonsevere<-data_Albumin_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_Albumin_Categorical_Compare_byVar_nonsevere<-data_Albumin_Categorical_Compare_byVar_nonsevere[!is.na(data_Albumin_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_Albumin_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_Albumin_Categorical_Compare_byVar_nonsevere)
+colnames(data_Albumin_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_Albumin_Categorical_Compare_byVar<-rbind(data_Albumin_Categorical_Compare_byVar_severe,data_Albumin_Categorical_Compare_byVar_nonsevere)
+
+data_Albumin_Categorical_Compare_byVar<-data.frame(data_Albumin_Categorical_Compare_byVar)
+metaprop_Albumin_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_Albumin_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="Albumin/Albumin_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+forest.meta(
+metaprop_Albumin_Categorical_Compare_byVar,layout =   "JAMA")
+dev.off()
+
+data_Albumin_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Albumin_Categorical_Compare")
+
+data_Albumin_Categorical_Compare <-data_Albumin_Categorical_Compare[order(data_Albumin_Categorical_Compare$author),]
+
+data_Albumin_Categorical_Compare
+
+data_Albumin_Categorical_Compare
+
+data_Albumin_Categorical_Compare<-data_Albumin_Categorical_Compare[!is.na(data_Albumin_Categorical_Compare$n1_severe)&!is.na(data_Albumin_Categorical_Compare$n2_nonsevere),]
+data_Albumin_Categorical_Compare
+
+help("metabin")
+metaprop_Albumin_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_Albumin_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="Albumin/Albumin_Categorical_Compare.pdf", width=8,height = 12) 
+forest.meta(metaprop_Albumin_Categorical_Compare,layout =   "JAMA")
+dev.off()
+
+
+data_Albumin_Continuous_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Albumin_Continuous_Compare")
+
+data_Albumin_Continuous_Compare <-data_Albumin_Continuous_Compare[order(data_Albumin_Continuous_Compare$author),]
+
+data_Albumin_Continuous_Compare
+
+help("metabin")
+metacont_Albumin_Continuous_Compare<-metacont(n.e = N1_severe,mean.e = Mean1_severe,sd.e = SD1_severe,n.c = N2_nonsevere,mean.c = Mean2_nonsevere,sd.c = SD2_nonsevere,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_Albumin_Continuous_Compare)
+
+pdf(file="Albumin/Albumin_Continuous_Compare.pdf", width=8,height = 12) 
+forest.meta(metacont_Albumin_Continuous_Compare,layout =   "JAMA")
+dev.off()
+
+
+
+data_Albumin_Continuous_Compare_COVIDvsNonCOVID <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Albumin_Continuous_Compare_2")
+
+data_Albumin_Continuous_Compare_COVIDvsNonCOVID <-data_Albumin_Continuous_Compare_COVIDvsNonCOVID[order(data_Albumin_Continuous_Compare_COVIDvsNonCOVID$author),]
+
+data_Albumin_Continuous_Compare_COVIDvsNonCOVID
+
+metacont_Albumin_Continuous_Compare_COVIDvsNonCOVID<-metacont(n.e = N1_COVID_19,mean.e = Mean1_COVID_19,sd.e = SD1_COVID_19,n.c = N2_nonCOVID_19,mean.c = Mean2_nonCOVID_19,sd.c = SD2_nonCOVID_19,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_Albumin_Continuous_Compare_COVIDvsNonCOVID)
+
+pdf(file="Albumin/Albumin_Continuous_Compare_COVIDvsNonCOVID.pdf", width=7,height = 7) 
+forest.meta(metacont_Albumin_Continuous_Compare_COVIDvsNonCOVID,layout =   "JAMA")
+dev.off()
+
+```
+
+
+#Bilirubin
+```{r}
+data_Bilirubin_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Bilirubin_Categorical_Overall")
+
+data_Bilirubin_Categorical_Overall<-data_Bilirubin_Categorical_Overall[order(data_Bilirubin_Categorical_Overall$author),]
+
+metaprop_Bilirubin_Categorical_Overall<-metaprop(event = data_Bilirubin_Categorical_Overall$n, n = data_Bilirubin_Categorical_Overall$N, data=data_Bilirubin_Categorical_Overall, comb.random=TRUE, studlab=data_Bilirubin_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="Bilirubin/Bilirubin_Categorical_Overall.pdf", width=8,height = 14) 
+forest.meta(metaprop_Bilirubin_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_Bilirubin_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Bilirubin_Categorical_Compare")
+data_Bilirubin_Categorical_Compare
+
+data_Bilirubin_Categorical_Compare <-data_Bilirubin_Categorical_Compare[order(data_Bilirubin_Categorical_Compare$author),]
+
+data_Bilirubin_Categorical_Compare_byVar_severe<-data_Bilirubin_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_Bilirubin_Categorical_Compare_byVar_severe<-data_Bilirubin_Categorical_Compare_byVar_severe[!is.na(data_Bilirubin_Categorical_Compare_byVar_severe$n1_severe), ]
+data_Bilirubin_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_Bilirubin_Categorical_Compare_byVar_severe)
+colnames(data_Bilirubin_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_Bilirubin_Categorical_Compare_byVar_nonsevere<-data_Bilirubin_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_Bilirubin_Categorical_Compare_byVar_nonsevere<-data_Bilirubin_Categorical_Compare_byVar_nonsevere[!is.na(data_Bilirubin_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_Bilirubin_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_Bilirubin_Categorical_Compare_byVar_nonsevere)
+colnames(data_Bilirubin_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_Bilirubin_Categorical_Compare_byVar<-rbind(data_Bilirubin_Categorical_Compare_byVar_severe,data_Bilirubin_Categorical_Compare_byVar_nonsevere)
+
+data_Bilirubin_Categorical_Compare_byVar<-data.frame(data_Bilirubin_Categorical_Compare_byVar)
+metaprop_Bilirubin_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_Bilirubin_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="Bilirubin/Bilirubin_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+forest.meta(
+metaprop_Bilirubin_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "1.9 cm")
+dev.off()
+
+data_Bilirubin_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Bilirubin_Categorical_Compare")
+data_Bilirubin_Categorical_Compare
+
+data_Bilirubin_Categorical_Compare <-data_Bilirubin_Categorical_Compare[order(data_Bilirubin_Categorical_Compare$author),]
+
+data_Bilirubin_Categorical_Compare
+
+data_Bilirubin_Categorical_Compare<-data_Bilirubin_Categorical_Compare[!is.na(data_Bilirubin_Categorical_Compare$n1_severe)&!is.na(data_Bilirubin_Categorical_Compare$n2_nonsevere),]
+data_Bilirubin_Categorical_Compare
+
+help("metabin")
+metaprop_Bilirubin_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_Bilirubin_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="Bilirubin/Bilirubin_Categorical_Compare.pdf", width=8,height = 12) 
+forest.meta(metaprop_Bilirubin_Categorical_Compare,layout =   "JAMA")
+dev.off()
+
+
+data_Bilirubin_Continuous_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Bilirubin_Continuous_Compare")
+
+data_Bilirubin_Continuous_Compare <-data_Bilirubin_Continuous_Compare[order(data_Bilirubin_Continuous_Compare$author),]
+
+data_Bilirubin_Continuous_Compare
+
+help("metabin")
+metacont_Bilirubin_Continuous_Compare<-metacont(n.e = N1_severe,mean.e = Mean1_severe,sd.e = SD1_severe,n.c = N2_nonsevere,mean.c = Mean2_nonsevere,sd.c = SD2_nonsevere,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_Bilirubin_Continuous_Compare)
+
+pdf(file="Bilirubin/Bilirubin_Continuous_Compare.pdf", width=8,height = 12) 
+forest.meta(metacont_Bilirubin_Continuous_Compare,layout =   "JAMA")
+dev.off()
+
+
+
+
+data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Bilirubin_Continuous_Compare_2")
+
+data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID <-data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID[order(data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID$author),]
+
+
+data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID <-data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID[order(data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID$author),]
+
+data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID
+
+metacont_Bilirubin_Continuous_Compare_COVIDvsNonCOVID<-metacont(n.e = N1_COVID_19,mean.e = Mean1_COVID_19,sd.e = SD1_COVID_19,n.c = N2_nonCOVID_19,mean.c = Mean2_nonCOVID_19,sd.c = SD2_nonCOVID_19,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_Bilirubin_Continuous_Compare_COVIDvsNonCOVID)
+
+pdf(file="Bilirubin/Bilirubin_Continuous_Compare_COVIDvsNonCOVID.pdf", width=8,height = 12) 
+forest.meta(metacont_Bilirubin_Continuous_Compare_COVIDvsNonCOVID,layout =   "JAMA")
+dev.off()
+
+```
+
+#Globulin
+```{r}
+data_Globulin_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Globulin_Categorical_Overall")
+
+data_Globulin_Categorical_Overall<-data_Globulin_Categorical_Overall[order(data_Globulin_Categorical_Overall$author),]
+
+metaprop_Globulin_Categorical_Overall<-metaprop(event = data_Globulin_Categorical_Overall$n, n = data_Globulin_Categorical_Overall$N, data=data_Globulin_Categorical_Overall, comb.random=TRUE, studlab=data_Globulin_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="Globulin/Globulin_Categorical_Overall.pdf", width=8,height = 12) 
+forest.meta(metaprop_Globulin_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+# data_Globulin_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Globulin_Categorical_Compare")
+# data_Globulin_Categorical_Compare
+# 
+# 
+# 
+# data_Globulin_Categorical_Compare_byVar_severe<-data_Globulin_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+# data_Globulin_Categorical_Compare_byVar_severe<-data_Globulin_Categorical_Compare_byVar_severe[!is.na(data_Globulin_Categorical_Compare_byVar_severe$n1_severe), ]
+# data_Globulin_Categorical_Compare_byVar_severe$group<-"Severe"
+# colnames(data_Globulin_Categorical_Compare_byVar_severe)
+# colnames(data_Globulin_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+# 
+# data_Globulin_Categorical_Compare_byVar_nonsevere<-data_Globulin_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+# data_Globulin_Categorical_Compare_byVar_nonsevere<-data_Globulin_Categorical_Compare_byVar_nonsevere[!is.na(data_Globulin_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+# data_Globulin_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+# colnames(data_Globulin_Categorical_Compare_byVar_nonsevere)
+# colnames(data_Globulin_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+# 
+# data_Globulin_Categorical_Compare_byVar<-rbind(data_Globulin_Categorical_Compare_byVar_severe,data_Globulin_Categorical_Compare_byVar_nonsevere)
+# 
+# data_Globulin_Categorical_Compare_byVar<-data.frame(data_Globulin_Categorical_Compare_byVar)
+# metaprop_Globulin_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_Globulin_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+# 
+# pdf(file="Globulin/Globulin_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+# forest.meta(
+# metaprop_Globulin_Categorical_Compare_byVar,layout =   "JAMA")
+# dev.off()
+# 
+# data_Globulin_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Globulin_Categorical_Compare")
+# data_Globulin_Categorical_Compare
+# 
+# data_Globulin_Categorical_Compare
+# 
+# data_Globulin_Categorical_Compare<-data_Globulin_Categorical_Compare[!is.na(data_Globulin_Categorical_Compare$n1_severe)&!is.na(data_Globulin_Categorical_Compare$n2_nonsevere),]
+# data_Globulin_Categorical_Compare
+# 
+# help("metabin")
+# metaprop_Globulin_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_Globulin_Categorical_Compare,method = "Inverse",sm = "RR")
+#   
+# pdf(file="Globulin/Globulin_Categorical_Compare.pdf", width=8,height = 12) 
+# forest.meta(metaprop_Globulin_Categorical_Compare,layout =   "JAMA")
+# dev.off()
+
+
+
+data_Globulin_Continuous_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Globulin_Continuous_Compare")
+
+data_Globulin_Continuous_Compare <-data_Globulin_Continuous_Compare[order(data_Globulin_Continuous_Compare$author),]
+
+data_Globulin_Continuous_Compare
+
+help("metabin")
+metacont_Globulin_Continuous_Compare<-metacont(n.e = N1_severe,mean.e = Mean1_severe,sd.e = SD1_severe,n.c = N2_nonsevere,mean.c = Mean2_nonsevere,sd.c = SD2_nonsevere,studlab = author,sm = "SMD",method.smd = "Hedges",data = data_Globulin_Continuous_Compare)
+
+pdf(file="Globulin/Globulin_Continuous_Compare.pdf", width=8,height = 12) 
+forest.meta(metacont_Globulin_Continuous_Compare,layout =   "JAMA")
+dev.off()
+
+
+```
+
+
+#LD
+```{r}
+data_LD_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "LD_Categorical_Overall")
+
+data_LD_Categorical_Overall<-data_LD_Categorical_Overall[order(data_LD_Categorical_Overall$author),]
+
+
+metaprop_LD_Categorical_Overall<-metaprop(event = data_LD_Categorical_Overall$n, n = data_LD_Categorical_Overall$N, data=data_LD_Categorical_Overall, comb.random=TRUE, studlab=data_LD_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="LD/LD_Categorical_Overall.pdf", width=8,height = 10) 
+forest.meta(metaprop_LD_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_LD_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "LD_Categorical_Compare")
+data_LD_Categorical_Compare
+
+data_LD_Categorical_Compare <-data_LD_Categorical_Compare[order(data_LD_Categorical_Compare$author),]
+
+
+data_LD_Categorical_Compare_byVar_severe<-data_LD_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_LD_Categorical_Compare_byVar_severe<-data_LD_Categorical_Compare_byVar_severe[!is.na(data_LD_Categorical_Compare_byVar_severe$n1_severe), ]
+data_LD_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_LD_Categorical_Compare_byVar_severe)
+colnames(data_LD_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_LD_Categorical_Compare_byVar_nonsevere<-data_LD_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_LD_Categorical_Compare_byVar_nonsevere<-data_LD_Categorical_Compare_byVar_nonsevere[!is.na(data_LD_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_LD_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_LD_Categorical_Compare_byVar_nonsevere)
+colnames(data_LD_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_LD_Categorical_Compare_byVar<-rbind(data_LD_Categorical_Compare_byVar_severe,data_LD_Categorical_Compare_byVar_nonsevere)
+
+data_LD_Categorical_Compare_byVar<-data.frame(data_LD_Categorical_Compare_byVar)
+metaprop_LD_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_LD_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="LD/LD_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+forest.meta(
+metaprop_LD_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "2 cm")
+dev.off()
+
+data_LD_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "LD_Categorical_Compare")
+
+data_LD_Categorical_Compare <-data_LD_Categorical_Compare[order(data_LD_Categorical_Compare$author),]
+
+data_LD_Categorical_Compare
+
+
+data_LD_Categorical_Compare
+
+data_LD_Categorical_Compare<-data_LD_Categorical_Compare[!is.na(data_LD_Categorical_Compare$n1_severe)&!is.na(data_LD_Categorical_Compare$n2_nonsevere),]
+data_LD_Categorical_Compare
+
+help("metabin")
+metaprop_LD_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_LD_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="LD/LD_Categorical_Compare.pdf", width=8,height = 12) 
+forest.meta(metaprop_LD_Categorical_Compare,layout =   "JAMA")
+dev.off()
+```
+
+
+#CLD
+```{r}
+data_CLD_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "CLD_Categorical_Overall")
+
+
+data_CLD_Categorical_Overall<-data_CLD_Categorical_Overall[order(data_CLD_Categorical_Overall$author),]
+
+metaprop_CLD_Categorical_Overall<-metaprop(event = data_CLD_Categorical_Overall$n, n = data_CLD_Categorical_Overall$N, data=data_CLD_Categorical_Overall, comb.random=TRUE, studlab=data_CLD_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="CLD/CLD_Categorical_Overall.pdf", width=8,height = 12) 
+forest.meta(metaprop_CLD_Categorical_Overall,layout =   "JAMA", colgap.forest = "1.1 cm")
+dev.off()
+
+
+data_CLD_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "CLD_Categorical_Compare")
+
+data_CLD_Categorical_Compare <-data_CLD_Categorical_Compare[order(data_CLD_Categorical_Compare$author),]
+
+data_CLD_Categorical_Compare
+
+
+data_CLD_Categorical_Compare_byVar_severe<-data_CLD_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_CLD_Categorical_Compare_byVar_severe<-data_CLD_Categorical_Compare_byVar_severe[!is.na(data_CLD_Categorical_Compare_byVar_severe$n1_severe), ]
+data_CLD_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_CLD_Categorical_Compare_byVar_severe)
+colnames(data_CLD_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_CLD_Categorical_Compare_byVar_nonsevere<-data_CLD_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_CLD_Categorical_Compare_byVar_nonsevere<-data_CLD_Categorical_Compare_byVar_nonsevere[!is.na(data_CLD_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_CLD_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_CLD_Categorical_Compare_byVar_nonsevere)
+colnames(data_CLD_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_CLD_Categorical_Compare_byVar<-rbind(data_CLD_Categorical_Compare_byVar_severe,data_CLD_Categorical_Compare_byVar_nonsevere)
+
+data_CLD_Categorical_Compare_byVar<-data.frame(data_CLD_Categorical_Compare_byVar)
+metaprop_CLD_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_CLD_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="CLD/CLD_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+forest.meta(
+metaprop_CLD_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "2.1 cm")
+dev.off()
+
+data_CLD_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "CLD_Categorical_Compare")
+
+data_CLD_Categorical_Compare <-data_CLD_Categorical_Compare[order(data_CLD_Categorical_Compare$author),]
+
+data_CLD_Categorical_Compare
+
+
+data_CLD_Categorical_Compare
+
+data_CLD_Categorical_Compare<-data_CLD_Categorical_Compare[!is.na(data_CLD_Categorical_Compare$n1_severe)&!is.na(data_CLD_Categorical_Compare$n2_nonsevere),]
+data_CLD_Categorical_Compare
+
+help("metabin")
+metaprop_CLD_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_CLD_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="CLD/CLD_Categorical_Compare.pdf", width=8,height = 12) 
+forest.meta(metaprop_CLD_Categorical_Compare,layout =   "JAMA")
+dev.off()
+```
+
+#TLD
+```{r}
+data_TLD_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "TLD_Categorical_Overall")
+data_TLD_Categorical_Overall<-data_TLD_Categorical_Overall[order(data_TLD_Categorical_Overall$author),]
+
+
+metaprop_TLD_Categorical_Overall<-metaprop(event = data_TLD_Categorical_Overall$n, n = data_TLD_Categorical_Overall$N, data=data_TLD_Categorical_Overall, comb.random=TRUE, studlab=data_TLD_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="TLD/TLD_Categorical_Overall.pdf", width=8,height = 14) 
+forest.meta(metaprop_TLD_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_TLD_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "TLD_Categorical_Compare")
+
+data_TLD_Categorical_Compare <-data_TLD_Categorical_Compare[order(data_TLD_Categorical_Compare$author),]
+
+data_TLD_Categorical_Compare
+
+
+data_TLD_Categorical_Compare_byVar_severe<-data_TLD_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_TLD_Categorical_Compare_byVar_severe<-data_TLD_Categorical_Compare_byVar_severe[!is.na(data_TLD_Categorical_Compare_byVar_severe$n1_severe), ]
+data_TLD_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_TLD_Categorical_Compare_byVar_severe)
+colnames(data_TLD_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_TLD_Categorical_Compare_byVar_nonsevere<-data_TLD_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_TLD_Categorical_Compare_byVar_nonsevere<-data_TLD_Categorical_Compare_byVar_nonsevere[!is.na(data_TLD_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_TLD_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_TLD_Categorical_Compare_byVar_nonsevere)
+colnames(data_TLD_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_TLD_Categorical_Compare_byVar<-rbind(data_TLD_Categorical_Compare_byVar_severe,data_TLD_Categorical_Compare_byVar_nonsevere)
+
+data_TLD_Categorical_Compare_byVar<-data.frame(data_TLD_Categorical_Compare_byVar)
+metaprop_TLD_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_TLD_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="TLD/TLD_Categorical_Compare_byVariable.pdf", width=8,height = 14) 
+forest.meta(
+metaprop_TLD_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "1.8 cm")
+dev.off()
+
+data_TLD_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "TLD_Categorical_Compare")
+
+data_TLD_Categorical_Compare <-data_TLD_Categorical_Compare[order(data_TLD_Categorical_Compare$author),]
+
+data_TLD_Categorical_Compare
+
+
+data_TLD_Categorical_Compare
+
+data_TLD_Categorical_Compare<-data_TLD_Categorical_Compare[!is.na(data_TLD_Categorical_Compare$n1_severe)&!is.na(data_TLD_Categorical_Compare$n2_nonsevere),]
+data_TLD_Categorical_Compare
+
+help("metabin")
+metaprop_TLD_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_TLD_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="TLD/TLD_Categorical_Compare.pdf", width=8,height = 14) 
+forest.meta(metaprop_TLD_Categorical_Compare,layout =   "JAMA")
+dev.off()
+```
+
+
+#Fatty_Liver
+```{r}
+data_Fatty_Liver_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Fatty_Liver_Categorical_Overall")
+
+data_Fatty_Liver_Categorical_Overall<-data_Fatty_Liver_Categorical_Overall[order(data_Fatty_Liver_Categorical_Overall$author),]
+
+
+metaprop_Fatty_Liver_Categorical_Overall<-metaprop(event = data_Fatty_Liver_Categorical_Overall$n, n = data_Fatty_Liver_Categorical_Overall$N, data=data_Fatty_Liver_Categorical_Overall, comb.random=TRUE, studlab=data_Fatty_Liver_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="Fatty_Liver/Fatty_Liver_Categorical_Overall.pdf", width=8,height = 12) 
+forest.meta(metaprop_Fatty_Liver_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_Fatty_Liver_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Fatty_Liver_Categorical_Compare")
+data_Fatty_Liver_Categorical_Compare
+
+data_Fatty_Liver_Categorical_Compare <-data_Fatty_Liver_Categorical_Compare[order(data_Fatty_Liver_Categorical_Compare$author),]
+
+
+data_Fatty_Liver_Categorical_Compare_byVar_severe<-data_Fatty_Liver_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_Fatty_Liver_Categorical_Compare_byVar_severe<-data_Fatty_Liver_Categorical_Compare_byVar_severe[!is.na(data_Fatty_Liver_Categorical_Compare_byVar_severe$n1_severe), ]
+data_Fatty_Liver_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_Fatty_Liver_Categorical_Compare_byVar_severe)
+colnames(data_Fatty_Liver_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_Fatty_Liver_Categorical_Compare_byVar_nonsevere<-data_Fatty_Liver_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_Fatty_Liver_Categorical_Compare_byVar_nonsevere<-data_Fatty_Liver_Categorical_Compare_byVar_nonsevere[!is.na(data_Fatty_Liver_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_Fatty_Liver_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_Fatty_Liver_Categorical_Compare_byVar_nonsevere)
+colnames(data_Fatty_Liver_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_Fatty_Liver_Categorical_Compare_byVar<-rbind(data_Fatty_Liver_Categorical_Compare_byVar_severe,data_Fatty_Liver_Categorical_Compare_byVar_nonsevere)
+
+data_Fatty_Liver_Categorical_Compare_byVar<-data.frame(data_Fatty_Liver_Categorical_Compare_byVar)
+metaprop_Fatty_Liver_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_Fatty_Liver_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="Fatty_Liver/Fatty_Liver_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+forest.meta(
+metaprop_Fatty_Liver_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "1.5 cm")
+dev.off()
+
+data_Fatty_Liver_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "Fatty_Liver_Categorical_Compare")
+data_Fatty_Liver_Categorical_Compare <-data_Fatty_Liver_Categorical_Compare[order(data_Fatty_Liver_Categorical_Compare$author),]
+
+data_Fatty_Liver_Categorical_Compare
+
+
+data_Fatty_Liver_Categorical_Compare
+
+data_Fatty_Liver_Categorical_Compare<-data_Fatty_Liver_Categorical_Compare[!is.na(data_Fatty_Liver_Categorical_Compare$n1_severe)&!is.na(data_Fatty_Liver_Categorical_Compare$n2_nonsevere),]
+data_Fatty_Liver_Categorical_Compare
+
+help("metabin")
+metaprop_Fatty_Liver_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_Fatty_Liver_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="Fatty_Liver/Fatty_Liver_Categorical_Compare.pdf", width=8,height = 12) 
+forest.meta(metaprop_Fatty_Liver_Categorical_Compare,layout =   "JAMA")
+dev.off()
+```
+
+#HepB
+```{r}
+data_HepB_Categorical_Overall <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "HepB_Categorical_Overall")
+
+data_HepB_Categorical_Overall<-data_HepB_Categorical_Overall[order(data_HepB_Categorical_Overall$author),]
+
+
+metaprop_HepB_Categorical_Overall<-metaprop(event = data_HepB_Categorical_Overall$n, n = data_HepB_Categorical_Overall$N, data=data_HepB_Categorical_Overall, comb.random=TRUE, studlab=data_HepB_Categorical_Overall$author,pscale = 100,method = "Inverse")
+
+pdf(file="HepB/HepB_Categorical_Overall.pdf", width=8,height = 12) 
+forest.meta(metaprop_HepB_Categorical_Overall,layout =   "JAMA")
+dev.off()
+
+
+data_HepB_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "HepB_Categorical_Compare")
+
+data_HepB_Categorical_Compare <-data_HepB_Categorical_Compare[order(data_HepB_Categorical_Compare$author),]
+
+data_HepB_Categorical_Compare
+
+
+data_HepB_Categorical_Compare_byVar_severe<-data_HepB_Categorical_Compare[,c("No","PMID","author","n1_severe","N1_severe")]
+data_HepB_Categorical_Compare_byVar_severe<-data_HepB_Categorical_Compare_byVar_severe[!is.na(data_HepB_Categorical_Compare_byVar_severe$n1_severe), ]
+data_HepB_Categorical_Compare_byVar_severe$group<-"Severe"
+colnames(data_HepB_Categorical_Compare_byVar_severe)
+colnames(data_HepB_Categorical_Compare_byVar_severe)<-c("No","PMID","author","n", "N", "group")
+
+data_HepB_Categorical_Compare_byVar_nonsevere<-data_HepB_Categorical_Compare[,c("No","PMID","author","n2_nonsevere","N2_nonsevere")]
+data_HepB_Categorical_Compare_byVar_nonsevere<-data_HepB_Categorical_Compare_byVar_nonsevere[!is.na(data_HepB_Categorical_Compare_byVar_nonsevere$n2_nonsevere), ]
+data_HepB_Categorical_Compare_byVar_nonsevere$group<-"Non-Severe"
+colnames(data_HepB_Categorical_Compare_byVar_nonsevere)
+colnames(data_HepB_Categorical_Compare_byVar_nonsevere)<-c("No","PMID","author","n", "N", "group")
+
+data_HepB_Categorical_Compare_byVar<-rbind(data_HepB_Categorical_Compare_byVar_severe,data_HepB_Categorical_Compare_byVar_nonsevere)
+
+data_HepB_Categorical_Compare_byVar<-data.frame(data_HepB_Categorical_Compare_byVar)
+metaprop_HepB_Categorical_Compare_byVar<-metaprop(event = n, n = N, data=data_HepB_Categorical_Compare_byVar, comb.random=TRUE, studlab=author,pscale = 100,method = "Inverse",byvar = group)
+
+pdf(file="HepB/HepB_Categorical_Compare_byVariable.pdf", width=8,height = 12) 
+forest.meta(
+metaprop_HepB_Categorical_Compare_byVar,layout =   "JAMA", colgap.forest = "1.5 cm")
+dev.off()
+
+data_HepB_Categorical_Compare <- read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Final Format COVID-19 and Hepatology Analysis.xlsx",sheet = "HepB_Categorical_Compare")
+
+data_HepB_Categorical_Compare <-data_HepB_Categorical_Compare[order(data_HepB_Categorical_Compare$author),]
+
+data_HepB_Categorical_Compare
+
+
+data_HepB_Categorical_Compare
+
+data_HepB_Categorical_Compare<-data_HepB_Categorical_Compare[!is.na(data_HepB_Categorical_Compare$n1_severe)&!is.na(data_HepB_Categorical_Compare$n2_nonsevere),]
+data_HepB_Categorical_Compare
+
+help("metabin")
+metaprop_HepB_Categorical_Compare<-metabin(event.e = n1_severe,n.e = N1_severe,event.c = n2_nonsevere,n.c = N2_nonsevere,studlab = author,data = data_HepB_Categorical_Compare,method = "Inverse",sm = "RR")
+  
+pdf(file="HepB/HepB_Categorical_Compare.pdf", width=8,height = 12) 
+forest.meta(metaprop_HepB_Categorical_Compare,layout =   "JAMA")
+dev.off()
+
+```
+
+
+#Forest plot Mega
+```{r}
+
+# reverses the factor level ordering for labels after coord_flip()
+
+library(readxl)
+prevalence_forest<-read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Lattice Plot Journal of Hepatology.xlsx","Prevalence")
+
+prevalence_forest$`Hepatic Parameters`<-as.factor(prevalence_forest$`Hepatic Parameters`)
+prevalence_forest$`Hepatic Parameters`
+
+# prevalence_forest$`Hepatic Parameters` <- factor(prevalence_forest$`Hepatic Parameters`, 
+#                                                  levels=c("Bilirubin","ALT","AST","ALP","GGT","Albumin",
+#                                                  "Globulin","AHI","CLD","TLD"))
+
+prevalence_forest$`Hepatic Parameters`<-factor(prevalence_forest$`Hepatic Parameters`,levels = 
+                                                rev(c("Bilirubin","ALT","AST","ALP","GGT","Albumin", "Globulin","AHI", "TLD", "CLD" )))
+
+# prevalence_forest$`Hepatic Parameters`<-factor(prevalence_forest$`Hepatic Parameters`,levels = rev(prevalence_forest$`Hepatic Parameters`))
+
+library(ggplot2)
+prevalence_fp <- ggplot(data=prevalence_forest, aes(x=`Hepatic Parameters`, y=center, ymin=lower, ymax=upper)) +
+        geom_pointrange() + 
+        geom_hline(yintercept=15, lty=2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab("Hepatic Parameters") + ylab("Prevalence (95% CI)") + theme(
+    axis.text = element_text(size = 18),
+    axis.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 16),
+    axis.text.x.bottom  =
+      element_text(size = 18),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    axis.line = element_line(colour = "black"),
+    legend.box.background = element_rect()
+  )
+
+pdf(file="MegaForest/Forest_prevalence.pdf", width=12,height = 6) 
+prevalence_fp
+dev.off()
+
+```
+
+```{r}
+RR_forest<-read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Lattice Plot Journal of Hepatology.xlsx","RR")
+
+RR_forest$`Hepatic Parameters`<-as.factor(RR_forest$`Hepatic Parameters`)
+RR_forest$`Hepatic Parameters`
+
+RR_forest$`Hepatic Parameters`<-factor(RR_forest$`Hepatic Parameters`,levels = 
+                                                 rev(c("Bilirubin","ALT","AST","ALP","GGT","Albumin", "Globulin","AHI", "TLD", "CLD" )))
+
+
+# RR_forest$`Hepatic Parameters`<-factor(RR_forest$`Hepatic Parameters`,levels = rev(RR_forest$`Hepatic Parameters`))
+
+library(ggplot2)
+RR_fp <- ggplot(data=RR_forest, aes(x=`Hepatic Parameters`, y=center, ymin=lower, ymax=upper)) +
+        geom_pointrange() + 
+        geom_hline(yintercept=1, lty=2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab("Hepatic Parameters") + ylab("RR (95% CI)") + theme(
+    axis.text = element_text(size = 18),
+    axis.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 16),
+    axis.text.x.bottom  =
+      element_text(size = 18),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    axis.line = element_line(colour = "black"),
+    legend.box.background = element_rect()
+  )
+
+pdf(file="MegaForest/Forest_RR.pdf", width=12,height = 6) 
+RR_fp
+dev.off()
+
+```
+
+```{r}
+SMD_forest<-read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Lattice Plot Journal of Hepatology.xlsx","SMD")
+
+SMD_forest$`Hepatic Parameters`<-as.factor(SMD_forest$`Hepatic Parameters`)
+SMD_forest$`Hepatic Parameters`
+
+SMD_forest$`Hepatic Parameters`<-factor(SMD_forest$`Hepatic Parameters`,levels = 
+                                                 rev(c("Bilirubin","ALT","AST","ALP","GGT","Albumin", "Globulin","AHI", "TLD", "CLD" )))
+
+SMD_forest$`Hepatic Parameters`<-factor(SMD_forest$`Hepatic Parameters`,levels = rev(SMD_forest$`Hepatic Parameters`))
+
+library(ggplot2)
+SMD_fp <- ggplot(data=SMD_forest, aes(x=`Hepatic Parameters`, y=center, ymin=lower, ymax=upper)) +
+        geom_pointrange() + 
+        geom_hline(yintercept=0, lty=2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab("Hepatic Parameters") + ylab("SMD (95% CI)") + theme(
+    axis.text = element_text(size = 18),
+    axis.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 16),
+    axis.text.x.bottom  =
+      element_text(size = 18),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    axis.line = element_line(colour = "black"),
+    legend.box.background = element_rect()
+  )
+
+pdf(file="MegaForest/Forest_SMD.pdf", width=12,height = 6) 
+SMD_fp
+dev.off()
+
+```
+
+
+```{r}
+
+
+Stratification_forest<-read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\Lattice Plot Journal of Hepatology.xlsx","Stratification")
+
+
+Stratification_forest$`Hepatic Parameters`<-as.factor(Stratification_forest$`Hepatic Parameters`)
+Stratification_forest$`Hepatic Parameters`
+
+Stratification_forest$`Hepatic Parameters` <- factor(Stratification_forest$`Hepatic Parameters`, 
+                                                 levels=c("Bilirubin","ALT","AST","ALP","GGT","Albumin",
+                                                 "Globulin","AHI","CLD","TLD"))
+# 
+# Stratification_forest$`Hepatic Parameters`<-factor(Stratification_forest$`Hepatic Parameters`,levels = unique(rev(Stratification_forest$`Hepatic Parameters`)))
+
+Stratification_forest$Stratification<-as.factor(Stratification_forest$Stratification)
+Stratification_forest$Stratification
+
+Stratification_forest$Stratification<-factor(Stratification_forest$Stratification,levels = c("Overall","Combined", "Severe","Nonsevere"))
+
+
+Stratification_fp = ggplot(data=Stratification_forest,
+    aes(x = Stratification,y=center, ymin=lower, ymax=upper ))+
+    geom_pointrange(aes(col=Stratification))+
+    geom_hline(aes(fill=Stratification),yintercept =15, linetype=2)+
+    xlab('Stratification')+ scale_y_continuous(
+    name = c("Prevalence (95% CI)"),
+    breaks = c(0,10,20,30,40,50,60,70,80,90,100),
+    limits = c(0, 100)
+  )+ geom_errorbar(aes(ymin=lower, ymax=upper,col=Stratification),width=0.2,cex=1)+ 
+    facet_wrap(~`Hepatic Parameters`,strip.position="top",nrow=1,scales = "free_x") + theme(
+    axis.title = element_text(size = 18),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14),
+  
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    
+    axis.line = element_line(colour = "black"),
+    legend.box.background = element_rect(),axis.text.x = element_blank()
+  )
+
+
+pdf(file="MegaForest/Forest_Stratification.pdf", width=12,height =12 ) 
+Stratification_fp
+dev.off()
+```
+
+
+
+```{r}
+library(readxl)
+prevalence_forest<-read_xlsx("D:\\Dropbox\\R_Files_4\\COVID-19 and Hepatic Manifestation\\COVID and Hepatic Manifestation/Lattice with all entry made - Copy.xlsx","Prevalence")
+
+prevalence_forest$`Hepatic Parameters`<-as.factor(prevalence_forest$`Hepatic Parameters`)
+prevalence_forest$`Hepatic Parameters`
+
+# prevalence_forest$`Hepatic Parameters` <- factor(prevalence_forest$`Hepatic Parameters`, 
+#                                                  levels=c("Bilirubin","ALT","AST","ALP","GGT","Albumin",
+#                                                  "Globulin","AHI","CLD","TLD"))
+
+prevalence_forest$`Hepatic Parameters`<-factor(prevalence_forest$`Hepatic Parameters`,levels = 
+                                                rev(c("Bilirubin","ALT","AST","ALP","GGT","Albumin", "Globulin","AHI", "TLD", "CLD" )))
+
+# prevalence_forest$`Hepatic Parameters`<-factor(prevalence_forest$`Hepatic Parameters`,levels = rev(prevalence_forest$`Hepatic Parameters`))
+
+library(ggplot2)
+prevalence_fp <- ggplot(data=prevalence_forest, aes(x=`Hepatic Parameters`, y=center, ymin=lower, ymax=upper)) +
+        geom_pointrange() + 
+        geom_hline(yintercept=1, lty=2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab("Hepatic Parameters") + ylab("Prevalence (95% CI)") + theme(
+    axis.text = element_text(size = 18),
+    axis.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 16),
+    axis.text.x.bottom  =
+      element_text(size = 18),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    axis.line = element_line(colour = "black"),
+    legend.box.background = element_rect()
+  )
+
+pdf(file="MegaForest/Forest_prevalence.pdf", width=12,height = 6) 
+prevalence_fp
+dev.off()
+
+```
+
